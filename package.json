@@ -1,7 +1,7 @@
 {
   "name": "board-cell",
   "description": "Lit-Element webcomponent board-cell",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "main": "board-cell.js",
   "repository": {
     "type": "git",
@@ -25,7 +25,7 @@
     "@babel/plugin-proposal-class-properties": "^7.2.3",
     "@babel/plugin-proposal-decorators": "^7.2.3",
     "@webcomponents/webcomponentsjs": "^2.2.4",
-    "es-dev-server": "^1.46.0",
+    "es-dev-server": "^2.0.2",
     "rollup": "^1.1.0",
     "rollup-plugin-babel": "^4.3.0",
     "rollup-plugin-node-resolve": "^4.0.0",

@@ -50,14 +50,22 @@ export class BoardCell extends LitElement {
 
   constructor() {
     super();
-    this._cellContent = this.innerHTML;
-    this._oldCellContent = '';
+    this._cellContent = [];
+    this._oldCellContent = [];
+    this._cellContentHTML = '';
 
     this.cellClicked = this.cellClicked.bind(this);
   }
 
   connectedCallback() {
     super.connectedCallback();
+    this._cellContent = [...this.querySelectorAll('*')];
+    const div = document.createElement('div');
+    this._cellContent.forEach((HTMLNode) => {
+      const HTMLnodeCloned = HTMLNode.cloneNode(true);
+      div.appendChild(HTMLnodeCloned);
+    })
+    this._cellContentHTML = div;
     if (this.onclickCallback && (this.parentElement[this.onclickCallback] || window[this.onclickCallback])) {
       this.addEventListener('click', this.cellClicked);
     }
@@ -78,8 +86,14 @@ export class BoardCell extends LitElement {
     const newValue = ev.srcElement.innerHTML;
     if (this.innerHTML !== '') {
       console.log(`cell ${this.id} content change with "${newValue}"`);
-      this._oldCellContent = this._cellContent
-      this._cellContent = newValue;
+      this._oldCellContent = this._cellContent;
+      const div = document.createElement('div');
+      this._cellContent = [...ev.srcElement.childNodes];
+      this._cellContent.forEach((HTMLNode) => {
+        const HTMLnodeCloned = HTMLNode.cloneNode(true);
+        div.appendChild(HTMLnodeCloned);
+      })
+      this._cellContentHTML = div;
       this.requestUpdate();
 
       const boardCell__changeContentEvent = new CustomEvent('board-cell__change-content', {detail: {id: this.id, oldContent: this._oldCellContent, newContent: this._cellContent}});
@@ -88,7 +102,7 @@ export class BoardCell extends LitElement {
   }
 
   render() {
-    return html`${this._cellContent}`;
+    return html`${this._cellContentHTML}`;
   }
 
 }
