@@ -53,6 +53,7 @@
       <script>
         let counter = 0;
         function cellClick(ev) {
+          console.log(ev.detail);
           counter += 1;
           console.log('clicked ' + counter + ' times');
         }

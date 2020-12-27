@@ -73,12 +73,13 @@ export class BoardCell extends LitElement {
   }
 
   cellClicked(ev) {
-    ev.detail = {posX: this.col, posY: this.row}
+    const newEv = Object.assign({}, ev);
+    newEv.detail = {posX: this.col, posY: this.row};
 
     if (this.parentElement[this.onclickCallback]) {
-      this.parentElement[this.onclickCallback](ev);
+      this.parentElement[this.onclickCallback](newEv);
     } else if(window[this.onclickCallback]) {
-      window[this.onclickCallback](ev);
+      window[this.onclickCallback](newEv);
     }
   }
 
