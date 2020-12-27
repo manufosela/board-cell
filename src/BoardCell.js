@@ -70,7 +70,7 @@ export class BoardCell extends LitElement {
     if (this.parentElement[this.onclickCallback]) {
       this.parentElement[this.onclickCallback]();
     } else if(window[this.onclickCallback]) {
-      window[this.onclickCallback]();
+      window[this.onclickCallback](ev);
     }
   }
 
