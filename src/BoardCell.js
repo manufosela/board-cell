@@ -68,7 +68,7 @@ export class BoardCell extends LitElement {
     console.log('cell clicked');
 
     if (this.parentElement[this.onclickCallback]) {
-      this.parentElement[this.onclickCallback]();
+      this.parentElement[this.onclickCallback](ev);
     } else if(window[this.onclickCallback]) {
       window[this.onclickCallback](ev);
     }
