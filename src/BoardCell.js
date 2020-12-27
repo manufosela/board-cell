@@ -73,7 +73,7 @@ export class BoardCell extends LitElement {
   }
 
   cellClicked(ev) {
-    console.log('cell clicked');
+    ev.detail = {posX: this.col, posY: this.row}
 
     if (this.parentElement[this.onclickCallback]) {
       this.parentElement[this.onclickCallback](ev);
