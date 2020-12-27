@@ -28,13 +28,13 @@ export class BoardCell extends LitElement {
        * @property
        * @type { Number }
        */
-      col: { type: Number },
+      col: { type: Number, attribute: 'data-col' },
       /**
        * 
        * @property
        * @type { Number }
        */
-      row: { type: Number },
+      row: { type: Number, attribute: 'data-row' },
       /**
        * 
        * @property
