@@ -61,6 +61,7 @@ export class BoardCell extends LitElement {
     this._cellContentHTML = '';
 
     this.cellClicked = this.cellClicked.bind(this);
+    this.log = false;
   }
 
   connectedCallback() {
