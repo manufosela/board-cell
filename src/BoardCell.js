@@ -40,7 +40,13 @@ export class BoardCell extends LitElement {
        * @property
        * @type { String }
        */
-      onclickCallback: {type: String, attribute: 'onclick' }
+      onclickCallback: {type: String, attribute: 'onclick' },
+      /**
+       * When 'log' is true show component log
+       * @property
+       * @type { Boolean }
+       */
+      log: { type: Boolean }
     }
   }
 
@@ -72,6 +78,12 @@ export class BoardCell extends LitElement {
     this.addEventListener('DOMSubtreeModified', this.cellContentChange);
   }
 
+  consoleLog() {
+    if (this.log) {
+      console.log.apply(this, arguments);
+    }
+  }
+
   cellClicked(ev) {
     const newEv = { detail: {posX: this.col, posY: this.row} };
 
@@ -85,7 +97,7 @@ export class BoardCell extends LitElement {
   cellContentChange(ev) {
     const newValue = ev.srcElement.innerHTML;
     if (this.innerHTML !== '') {
-      console.log(`cell ${this.id} content change with "${newValue}"`);
+      this.consoleLog(`cell ${this.id} content change with "${newValue}"`);
       this._oldCellContent = this._cellContent;
       const div = document.createElement('div');
       this._cellContent = [...ev.srcElement.childNodes];
