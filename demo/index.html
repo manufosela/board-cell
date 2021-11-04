@@ -40,14 +40,24 @@
       <div class="blocks">
         <pre class="block code">
           <code>
-            &lt;board-cell&gt;&lt;/board-cell&gt;
+            &lt;board-cell id="demo-cell"
+            cols="10"
+            rows="10"
+            cell-size="32"
+            title="Demo board-cell"
+            hide-cell-lines
+            onclick="cellClick"&gt;&lt;/board-cell&gt;
           </code>
         </pre>
         <pre class="block attributes">
           <h3>Attributes</h3>
           <ul>
-            <li>property1 (String)</li>
-            <li>property2 (Number)</li>
+            <li>cols (Number)</li>
+            <li>rows (Number)</li>
+            <li>cell-size (Number)</li>
+            <li>title (String)</li>
+            <li>show-cell-lines (Boolean)</li>
+            <li>onclick (String)</li>
           </ul>
         </pre>
       </div>
@@ -56,9 +66,8 @@
         id="demo-cell"
         cols="10"
         rows="10"
-        cell-size="32"
+        cell-size="50"
         title="Demo board-cell"
-        show-cell-lines="false"
         onclick="cellClick"
       >
       </board-cell>
