@@ -48,11 +48,11 @@ export class BoardCell extends LitElement {
        */
       title: { type: String },
       /**
-       * Show Cell Lines
+       * Hide Cell Lines
        * @property
        * @type { Boolean }
        */
-      showCellLines: { type: Boolean, attribute: 'show-cell-lines' },
+      hideCellLines: { type: Boolean, attribute: 'hide-cell-lines', reflect: true },
       /**
        * Callback function to be called when the board is clicked
        * @property
@@ -68,7 +68,7 @@ export class BoardCell extends LitElement {
 
   constructor() {
     super();
-    this.showCellLines = false;
+    this.hideCellLines = false;
     this.boardClicked = this.boardClicked.bind(this);
     this._clearColContentCallback = this._clearColContentCallback.bind(this);
     this._clearRowContentCallback = this._clearRowContentCallback.bind(this);
@@ -91,7 +91,6 @@ export class BoardCell extends LitElement {
         this.cellsWithoutEvent[i].push(false);
       }
     }
-    this.showCellLines = (this.showCellLines === "true");
     document.addEventListener('board-change-cell-content', this.changeCellContent);
     document.addEventListener('board-clear-cell-content', this._clearCellContentCallback);
     document.addEventListener('board-clear-all-content', this._clearAllContentCallback);
@@ -123,7 +122,7 @@ export class BoardCell extends LitElement {
     this.ctx = this.canvas.getContext('2d');
     for (let i = 0; i <= width; i+=this.cellSize) {
       for (let j = 0; j <= height; j+=this.cellSize) {
-        if (this.showCellLines) {
+        if (!this.hideCellLines) {
           this.ctx.moveTo(i, 0);
           this.ctx.lineTo(i, width);
           this.ctx.moveTo(0, j);
