@@ -28,25 +28,31 @@ export class BoardCell extends LitElement {
        * @property
        * @type { Number }
        */
-      col: { type: Number, attribute: 'data-col' },
+      cols: { type: Number },
       /**
        * 
        * @property
        * @type { Number }
        */
-      row: { type: Number, attribute: 'data-row' },
+      rows: { type: Number },
       /**
        * 
+       * @property
+       * @type { Number }
+       */
+      cellSize: { type: Number, attribute: 'cell-size' },
+      /**
+       * Board title
+       * @property
+       * @type { String }
+       */
+      title: { type: String },
+      /**
+       * Callback function to be called when the board is clicked
        * @property
        * @type { String }
        */
       onclickCallback: {type: String, attribute: 'onclick' },
-      /**
-       * When 'log' is true show component log
-       * @property
-       * @type { Boolean }
-       */
-      log: { type: Boolean }
     }
   }
 
@@ -56,66 +62,158 @@ export class BoardCell extends LitElement {
 
   constructor() {
     super();
-    this._cellContent = [];
-    this._oldCellContent = [];
-    this._cellContentHTML = '';
+    this.boardClicked = this.boardClicked.bind(this);
+    this._clearColContent = this._clearColContent.bind(this);
+    this._clearRowContent = this._clearRowContent.bind(this);
+    this._clearCellContent = this._clearCellContent.bind(this);
+    this.changeCellContent = this.changeCellContent.bind(this);
 
-    this.cellClicked = this.cellClicked.bind(this);
-    this.log = false;
+    document.addEventListener('board-change-cell-content', this.changeCellContent);
+    document.addEventListener('board-clear-cell-content', this._clearCellContent);
+    document.addEventListener('board-clear-all-content', this._clearAllContent);
+    document.addEventListener('board-cell-content-clear-row', this._clearRowContent)
+    document.addEventListener('board-cell-content-clear-col', this._clearColContent);
   }
 
   connectedCallback() {
     super.connectedCallback();
-    this._cellContent = [...this.parentNode.querySelectorAll('board-cell > *')];
-    const div = document.createElement('div');
-    this._cellContent.forEach((HTMLNode) => {
-      const HTMLnodeCloned = HTMLNode.cloneNode(true);
-      div.appendChild(HTMLnodeCloned);
-    })
-    this._cellContentHTML = div;
     if (this.onclickCallback && (this.parentElement[this.onclickCallback] || window[this.onclickCallback])) {
-      this.addEventListener('click', this.cellClicked);
+      this.addEventListener('click', this.boardClicked);
     }
-    this.addEventListener('DOMSubtreeModified', this.cellContentChange);
+    this.cellsContent = [];
+    for(let i=0; i<this.rows; i++) {
+      this.cellsContent.push([]);
+      for(let j=0; j<this.cols; j++) {
+        this.cellsContent[i].push(null);
+      }
+    }
+    
+    // this.addEventListener('DOMSubtreeModified', this.cellContentChange);
   }
 
-  consoleLog() {
-    if (this.log) {
-      console.log.apply(this, arguments);
+  firstUpdated() {
+    this.drawBoard();
+  }
+
+  drawBoard(board) {
+    const width = this.rows * this.cellSize;
+    const height = this.cols * this.cellSize;
+    this.canvas = this.shadowRoot.querySelector('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    for (let i = 0; i < width; i+=this.cellSize) {
+      for (let j = 0; j < height; j+=this.cellSize) {
+        this.ctx.moveTo(i, 0);
+        this.ctx.lineTo(i, width);
+        this.ctx.moveTo(0, j);
+        this.ctx.lineTo(height, j);
+        this.ctx.strokeStyle = '#ccc';
+        this.ctx.stroke();
+      }
     }
   }
 
-  cellClicked(ev) {
-    const newEv = { detail: {posX: this.col, posY: this.row} };
-
-    if (this.parentElement[this.onclickCallback]) {
-      this.parentElement[this.onclickCallback](newEv);
-    } else if(window[this.onclickCallback]) {
-      window[this.onclickCallback](newEv);
+  _drawCellsContent() {
+    for(let i=0; i<this.rows; i++) {
+      for(let j=0; j<this.cols; j++) {
+        if(this.cellsContent[i][j]) {
+          const dx = (j - 1) * this.cellSize;
+          const dy = (i - 1) * this.cellSize;
+          ctx.drawImage(this.cellsContent[i][j], dx, dy);
+        }
+      }
     }
   }
 
-  cellContentChange(ev) {
-    const newValue = ev.srcElement.innerHTML;
-    if (this.innerHTML !== '') {
-      this.consoleLog(`cell ${this.id} content change with "${newValue}"`);
-      this._oldCellContent = this._cellContent;
-      const div = document.createElement('div');
-      this._cellContent = [...ev.srcElement.childNodes];
-      this._cellContent.forEach((HTMLNode) => {
-        const HTMLnodeCloned = HTMLNode.cloneNode(true);
-        div.appendChild(HTMLnodeCloned);
-      })
-      this._cellContentHTML = div;
-      this.requestUpdate();
+  _drawCellContent(x, y, dx, dy) {
+    const content = this.cellsContent[x][y];
+    if (content.match(/^#[0-9A-F]{6}$/i)) {
+      this.ctx.fillStyle = content;
+      this.ctx.fillRect(dx, dy, this.cellSize, this.cellSize);
+    } else if (content.match(/^(http|https):\/\/[^ "]+$/i)) {
+      const img = new Image();
+      img.src = content;
+      img.onload = () => {
+        this.ctx.drawImage(img, dx, dy, this.cellSize, this.cellSize);
+      }
+    }
+  }
 
-      const boardCell__changeContentEvent = new CustomEvent('board-cell__change-content', {detail: {id: this.id, oldContent: this._oldCellContent.innerHTML, newContent: this._cellContentHTML.innerHTML}});
-      document.dispatchEvent(boardCell__changeContentEvent);
+  changeCellContent(ev) {
+    if (ev.detail.id == this.id) {
+      const detail = ev.detail;
+      const content = detail.content;
+      const dx = (detail.cellx - 1) * this.cellSize;
+      const dy = (detail.celly - 1) * this.cellSize;
+      this.cellsContent[detail.cellx - 1][detail.celly - 1] = content;
+      this._drawCellContent(detail.cellx - 1, detail.celly - 1, dx, dy);
+    }
+  }
+
+  boardClicked(ev) {
+    if (ev.target.id == this.id) {
+      var rect = this.canvas.getBoundingClientRect();
+      const newEvDetail = { detail:
+        {
+          mousex: ev.clientX - rect.left,
+          mousey: ev.clientY - rect.top,
+          cellx: Math.floor((ev.clientX - rect.left) / this.cellSize) + 1,
+          celly: Math.floor((ev.clientY - rect.top) / this.cellSize) + 1,
+        }
+      };    
+
+      if (this.parentElement[this.onclickCallback]) {
+        this.parentElement[this.onclickCallback](newEvDetail);
+      } else if(window[this.onclickCallback]) {
+        window[this.onclickCallback](newEvDetail);
+      }
+    }
+  }
+
+  _clearColContent(ev) {
+    if (ev.detail.id == this.id) {
+      for(let i=0; i<this.rows; i++) {
+        for(let j=0; j<this.cols; j++) {
+          if(j == ev.detail.col) {
+            this.cellsContent[i][j] = null;
+          }
+        }
+      }
+    }
+  }
+
+  _clearRowContent(ev) {
+    if (ev.detail.id == this.id) {
+      for(let i=0; i<this.rows; i++) {
+        for(let j=0; j<this.cols; j++) {
+          if(i == ev.detail.row) {
+            this.cellsContent[i][j] = null;
+          }
+        }
+      }
+    }
+  }
+
+  _clearCellContent(ev) {
+    if (ev.detail.id == this.id) {  
+      this.cellsContent[ev.detail.cellx-1][ev.detail.celly-1] = null;
+    }
+  }
+
+  _clearAllContent(ev) {
+    if (ev.detail.id == this.id) {
+      for(let i=0; i<this.rows; i++) {
+        for(let j=0; j<this.cols; j++) {
+          this.cellsContent[i][j] = null;
+        }
+      }
     }
   }
 
   render() {
-    return html`${this._cellContentHTML}`;
+    return html`
+      <h1>${this.title}</h1>
+      <canvas id="${this.id}_canvas" width="${this.cols * this.cellSize}" height="${this.rows * this.cellSize}" class="board"></canvas>
+    `;
   }
 
 }

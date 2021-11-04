@@ -1,25 +1,28 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>board-cell demo</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes"
+    />
     <script type="module" src="../board-cell.js"></script>
     <style>
       .blocks {
-        display:flex;
-        flex-direction:row;
+        display: flex;
+        flex-direction: row;
         flex-wrap: wrap;
       }
       .block {
-        display:flex;
-        flex-direction:column;
+        display: flex;
+        flex-direction: column;
         flex-wrap: wrap;
         white-space: normal;
       }
       .code {
         padding: 20px;
-        color:#FFF; 
+        color: #fff;
         background: #000;
       }
       .attributes {
@@ -46,21 +49,30 @@
         </pre>
       </div>
 
-      <board-cell id="demo-cell" data-col="4" data-row="3" onclick="cellClick">
-        <div>DEMO CELL without BOARD</div>
+      <board-cell
+        id="demo-cell"
+        cols="10"
+        rows="10"
+        cell-size="32"
+        title="Demo board-cell"
+        onclick="cellClick"
+      >
       </board-cell>
 
       <script>
         let counter = 0;
         function cellClick(ev) {
           console.log(ev.detail);
-          counter += 1;
-          console.log('clicked ' + counter + ' times');
+          const drawCell = new CustomEvent("board-change-cell-content", {
+            detail: {
+              id: "demo-cell",
+              cellx: ev.detail.cellx,
+              celly: ev.detail.celly,
+              content: "#" + Math.floor(Math.random() * 16777215).toString(16),
+            },
+          });
+          document.dispatchEvent(drawCell);
         }
-
-        document.addEventListener('board-cell__change-content', function(ev) {
-          console.log(ev.detail);
-        })
       </script>
     </div>
   </body>
