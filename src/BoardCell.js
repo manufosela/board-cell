@@ -160,6 +160,9 @@ export class BoardCell extends LitElement {
       img.onload = () => {
         this.ctx.drawImage(img, dx, dy, this.cellSize, this.cellSize);
       }
+    } else {
+      this.ctx.font = `bold ${this.cellSize/2}px Arial`;
+      this.ctx.fillText(content, dx + this.cellSize/2 - 8, dy + this.cellSize/2 + 8);
     }
   }
 
