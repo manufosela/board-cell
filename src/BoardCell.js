@@ -67,12 +67,6 @@ export class BoardCell extends LitElement {
     this._clearRowContent = this._clearRowContent.bind(this);
     this._clearCellContent = this._clearCellContent.bind(this);
     this.changeCellContent = this.changeCellContent.bind(this);
-
-    document.addEventListener('board-change-cell-content', this.changeCellContent);
-    document.addEventListener('board-clear-cell-content', this._clearCellContent);
-    document.addEventListener('board-clear-all-content', this._clearAllContent);
-    document.addEventListener('board-cell-content-clear-row', this._clearRowContent)
-    document.addEventListener('board-cell-content-clear-col', this._clearColContent);
   }
 
   connectedCallback() {
@@ -87,8 +81,25 @@ export class BoardCell extends LitElement {
         this.cellsContent[i].push(null);
       }
     }
-    
+
+    document.addEventListener('board-change-cell-content', this.changeCellContent);
+    document.addEventListener('board-clear-cell-content', this._clearCellContent);
+    document.addEventListener('board-clear-all-content', this._clearAllContent);
+    document.addEventListener('board-cell-content-clear-row', this._clearRowContent)
+    document.addEventListener('board-cell-content-clear-col', this._clearColContent);
     // this.addEventListener('DOMSubtreeModified', this.cellContentChange);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this.onclickCallback && (this.parentElement[this.onclickCallback] || window[this.onclickCallback])) {
+      this.removeEventListener('click', this.boardClicked);
+    }
+    document.removeEventListener('board-change-cell-content', this.changeCellContent);
+    document.removeEventListener('board-clear-cell-content', this._clearCellContent);
+    document.removeEventListener('board-clear-all-content', this._clearAllContent);
+    document.removeEventListener('board-cell-content-clear-row', this._clearRowContent)
+    document.removeEventListener('board-cell-content-clear-col', this._clearColContent);
   }
 
   firstUpdated() {
