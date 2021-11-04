@@ -55,24 +55,32 @@
         rows="10"
         cell-size="32"
         title="Demo board-cell"
+        show-cell-lines="false"
         onclick="cellClick"
       >
       </board-cell>
 
       <script>
-        let counter = 0;
+        const color = Math.floor(Math.random() * 16777215).toString(16);
         function cellClick(ev) {
           console.log(ev.detail);
-          const drawCell = new CustomEvent("board-change-cell-content", {
-            detail: {
-              id: "demo-cell",
-              cellx: ev.detail.cellx,
-              celly: ev.detail.celly,
-              content: "#" + Math.floor(Math.random() * 16777215).toString(16),
-            },
-          });
-          document.dispatchEvent(drawCell);
+          if (ev.detail.content === null) {
+            const drawCell = new CustomEvent("board-change-cell-content", {
+              detail: {
+                id: "demo-cell",
+                cellx: ev.detail.cellx,
+                celly: ev.detail.celly,
+                content: `#${color}`,
+              },
+            });
+            document.dispatchEvent(drawCell);
+          }
         }
+
+        window.onload = function () {
+          const board = document.querySelector("board-cell");
+          board.clearEventCell(1, 1);
+        };
       </script>
     </div>
   </body>

@@ -24,19 +24,19 @@ export class BoardCell extends LitElement {
        */
       id: { type: String },
       /**
-       * 
+       * Number of columns
        * @property
        * @type { Number }
        */
       cols: { type: Number },
       /**
-       * 
+       * Number of rows
        * @property
        * @type { Number }
        */
       rows: { type: Number },
       /**
-       * 
+       * Cell Size in pixels
        * @property
        * @type { Number }
        */
@@ -47,6 +47,12 @@ export class BoardCell extends LitElement {
        * @type { String }
        */
       title: { type: String },
+      /**
+       * Show Cell Lines
+       * @property
+       * @type { Boolean }
+       */
+      showCellLines: { type: Boolean, attribute: 'show-cell-lines' },
       /**
        * Callback function to be called when the board is clicked
        * @property
@@ -62,6 +68,7 @@ export class BoardCell extends LitElement {
 
   constructor() {
     super();
+    this.showCellLines = false;
     this.boardClicked = this.boardClicked.bind(this);
     this._clearColContent = this._clearColContent.bind(this);
     this._clearRowContent = this._clearRowContent.bind(this);
@@ -75,13 +82,16 @@ export class BoardCell extends LitElement {
       this.addEventListener('click', this.boardClicked);
     }
     this.cellsContent = [];
+    this.cellsWithoutEvent = [];
     for(let i=0; i<this.rows; i++) {
       this.cellsContent.push([]);
+      this.cellsWithoutEvent.push([]);
       for(let j=0; j<this.cols; j++) {
         this.cellsContent[i].push(null);
+        this.cellsWithoutEvent[i].push(false);
       }
     }
-
+    this.showCellLines = (this.showCellLines === "true");
     document.addEventListener('board-change-cell-content', this.changeCellContent);
     document.addEventListener('board-clear-cell-content', this._clearCellContent);
     document.addEventListener('board-clear-all-content', this._clearAllContent);
@@ -113,10 +123,12 @@ export class BoardCell extends LitElement {
     this.ctx = this.canvas.getContext('2d');
     for (let i = 0; i < width; i+=this.cellSize) {
       for (let j = 0; j < height; j+=this.cellSize) {
-        this.ctx.moveTo(i, 0);
-        this.ctx.lineTo(i, width);
-        this.ctx.moveTo(0, j);
-        this.ctx.lineTo(height, j);
+        if (this.showCellLines) {
+          this.ctx.moveTo(i, 0);
+          this.ctx.lineTo(i, width);
+          this.ctx.moveTo(0, j);
+          this.ctx.lineTo(height, j);
+        }
         this.ctx.strokeStyle = '#ccc';
         this.ctx.stroke();
       }
@@ -149,6 +161,19 @@ export class BoardCell extends LitElement {
     }
   }
 
+  clearEventCell(x, y) {
+    this.cellsWithoutEvent[x-1][y-1] = true;
+  }
+
+  setEventCell(x, y) {
+    this.cellsWithoutEvent[x-1][y-1] = false;
+  }
+
+  setCellContent(x, y, content) {
+    this.cellsContent[x][y] = content;
+    this.requestUpdate();
+  }
+
   changeCellContent(ev) {
     if (ev.detail.id == this.id) {
       const detail = ev.detail;
@@ -163,19 +188,24 @@ export class BoardCell extends LitElement {
   boardClicked(ev) {
     if (ev.target.id == this.id) {
       var rect = this.canvas.getBoundingClientRect();
+      const cellx = Math.floor((ev.clientX - rect.left) / this.cellSize);
+      const celly = Math.floor((ev.clientY - rect.top) / this.cellSize);
       const newEvDetail = { detail:
         {
           mousex: ev.clientX - rect.left,
           mousey: ev.clientY - rect.top,
-          cellx: Math.floor((ev.clientX - rect.left) / this.cellSize) + 1,
-          celly: Math.floor((ev.clientY - rect.top) / this.cellSize) + 1,
+          cellx: cellx + 1,
+          celly: celly + 1,
+          content: this.cellsContent[cellx][celly]
         }
       };    
 
-      if (this.parentElement[this.onclickCallback]) {
-        this.parentElement[this.onclickCallback](newEvDetail);
-      } else if(window[this.onclickCallback]) {
-        window[this.onclickCallback](newEvDetail);
+      if (!this.cellsWithoutEvent[cellx][celly]) {
+        if (this.parentElement[this.onclickCallback]) {
+          this.parentElement[this.onclickCallback](newEvDetail);
+        } else if(window[this.onclickCallback]) {
+          window[this.onclickCallback](newEvDetail);
+        }
       }
     }
   }
