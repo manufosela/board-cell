@@ -70,9 +70,9 @@ export class BoardCell extends LitElement {
     super();
     this.showCellLines = false;
     this.boardClicked = this.boardClicked.bind(this);
-    this._clearColContent = this._clearColContent.bind(this);
-    this._clearRowContent = this._clearRowContent.bind(this);
-    this._clearCellContent = this._clearCellContent.bind(this);
+    this._clearColContentCallback = this._clearColContentCallback.bind(this);
+    this._clearRowContentCallback = this._clearRowContentCallback.bind(this);
+    this._clearCellContentCallback = this._clearCellContentCallback.bind(this);
     this.changeCellContent = this.changeCellContent.bind(this);
   }
 
@@ -93,10 +93,10 @@ export class BoardCell extends LitElement {
     }
     this.showCellLines = (this.showCellLines === "true");
     document.addEventListener('board-change-cell-content', this.changeCellContent);
-    document.addEventListener('board-clear-cell-content', this._clearCellContent);
-    document.addEventListener('board-clear-all-content', this._clearAllContent);
-    document.addEventListener('board-cell-content-clear-row', this._clearRowContent)
-    document.addEventListener('board-cell-content-clear-col', this._clearColContent);
+    document.addEventListener('board-clear-cell-content', this._clearCellContentCallback);
+    document.addEventListener('board-clear-all-content', this._clearAllContentCallback);
+    document.addEventListener('board-cell-content-clear-row', this._clearRowContentCallback)
+    document.addEventListener('board-cell-content-clear-col', this._clearColContentCallback);
     // this.addEventListener('DOMSubtreeModified', this.cellContentChange);
   }
 
@@ -106,23 +106,23 @@ export class BoardCell extends LitElement {
       this.removeEventListener('click', this.boardClicked);
     }
     document.removeEventListener('board-change-cell-content', this.changeCellContent);
-    document.removeEventListener('board-clear-cell-content', this._clearCellContent);
-    document.removeEventListener('board-clear-all-content', this._clearAllContent);
-    document.removeEventListener('board-cell-content-clear-row', this._clearRowContent)
-    document.removeEventListener('board-cell-content-clear-col', this._clearColContent);
+    document.removeEventListener('board-clear-cell-content', this._clearCellContentCallback);
+    document.removeEventListener('board-clear-all-content', this._clearAllContentCallback);
+    document.removeEventListener('board-cell-content-clear-row', this._clearRowContentCallback)
+    document.removeEventListener('board-cell-content-clear-col', this._clearColContentCallback);
   }
 
   firstUpdated() {
     this.drawBoard();
   }
 
-  drawBoard(board) {
+  drawBoard() {
     const width = this.rows * this.cellSize;
     const height = this.cols * this.cellSize;
     this.canvas = this.shadowRoot.querySelector('canvas');
     this.ctx = this.canvas.getContext('2d');
-    for (let i = 0; i < width; i+=this.cellSize) {
-      for (let j = 0; j < height; j+=this.cellSize) {
+    for (let i = 0; i <= width; i+=this.cellSize) {
+      for (let j = 0; j <= height; j+=this.cellSize) {
         if (this.showCellLines) {
           this.ctx.moveTo(i, 0);
           this.ctx.lineTo(i, width);
@@ -135,13 +135,16 @@ export class BoardCell extends LitElement {
     }
   }
 
-  _drawCellsContent() {
+  drawCellsContent() {
     for(let i=0; i<this.rows; i++) {
       for(let j=0; j<this.cols; j++) {
+        const dx = (j - 1) * this.cellSize;
+        const dy = (i - 1) * this.cellSize;
         if(this.cellsContent[i][j]) {
-          const dx = (j - 1) * this.cellSize;
-          const dy = (i - 1) * this.cellSize;
-          ctx.drawImage(this.cellsContent[i][j], dx, dy);
+          this._drawCellContent(dx, dy, this.cellsContent[i][j]);
+        } else {
+          this.ctx.fillStyle = '#FFF';
+          this.ctx.fillRect(dx, dy, this.cellSize, this.cellSize);
         }
       }
     }
@@ -210,43 +213,59 @@ export class BoardCell extends LitElement {
     }
   }
 
-  _clearColContent(ev) {
-    if (ev.detail.id == this.id) {
-      for(let i=0; i<this.rows; i++) {
-        for(let j=0; j<this.cols; j++) {
-          if(j == ev.detail.col) {
-            this.cellsContent[i][j] = null;
-          }
-        }
-      }
-    }
-  }
-
-  _clearRowContent(ev) {
-    if (ev.detail.id == this.id) {
-      for(let i=0; i<this.rows; i++) {
-        for(let j=0; j<this.cols; j++) {
-          if(i == ev.detail.row) {
-            this.cellsContent[i][j] = null;
-          }
-        }
-      }
-    }
-  }
-
-  _clearCellContent(ev) {
-    if (ev.detail.id == this.id) {  
-      this.cellsContent[ev.detail.cellx-1][ev.detail.celly-1] = null;
-    }
-  }
-
-  _clearAllContent(ev) {
-    if (ev.detail.id == this.id) {
-      for(let i=0; i<this.rows; i++) {
-        for(let j=0; j<this.cols; j++) {
+  clearColContent(colToClear) {
+    for(let i=0; i<this.rows; i++) {
+      for(let j=0; j<this.cols; j++) {
+        if(j == colToClear) {
           this.cellsContent[i][j] = null;
         }
       }
+    }
+  }
+
+  _clearColContentCallback(ev) {
+    if (ev.detail.id == this.id) {
+      this.clearColContent(ev.detail.col);
+    }
+  }
+
+  clearRowContent(rowToClear) {
+    for(let i=0; i<this.rows; i++) {
+      for(let j=0; j<this.cols; j++) {
+        if(i == rowToClear) {
+          this.cellsContent[i][j] = null;
+        }
+      }
+    }
+  }
+
+  _clearRowContentCallback(ev) {
+    if (ev.detail.id == this.id) {
+      this.clearRowContent(ev.detail.row);
+    }
+  }
+
+  clearCellContent(x, y) {
+    this.cellsContent[x-1][y-1] = null;
+  }
+
+  _clearCellContentCallback(ev) {
+    if (ev.detail.id == this.id) {  
+      this.clearCellContent(ev.detail.cellx, ev.detail.celly);
+    }
+  }
+
+  clearAllContent() {
+    for(let i=0; i<this.rows; i++) {
+      for(let j=0; j<this.cols; j++) {
+        this.cellsContent[i][j] = null;
+      }
+    }
+  }
+
+  _clearAllContentCallback(ev) {
+    if (ev.detail.id == this.id) {
+      this.clearAllContent();
     }
   }
 
