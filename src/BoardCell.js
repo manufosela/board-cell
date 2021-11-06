@@ -48,11 +48,29 @@ export class BoardCell extends LitElement {
        */
       title: { type: String },
       /**
+       * Change appaerance cell when hovering
+       * @property
+       * @type { Boolean }
+       */
+       hoverCell: { type: Boolean, attribute: 'hover-cell' },
+      /**
        * Hide Cell Lines
        * @property
        * @type { Boolean }
        */
-      hideCellLines: { type: Boolean, attribute: 'hide-cell-lines', reflect: true },
+      hideCellLines: { type: Boolean, attribute: 'hide-cell-lines' },
+      /**
+       * Cell text color
+       * @property
+       * @type { String }
+       */
+       cellTextColor: { type: String, attribute: 'cell-text-color' },
+      /**
+       * Grid color
+       * @property
+       * @type { String }
+       */
+      gridColor: { type: String, attribute: 'grid-color' },
       /**
        * Callback function to be called when the board is clicked
        * @property
@@ -69,11 +87,21 @@ export class BoardCell extends LitElement {
   constructor() {
     super();
     this.hideCellLines = false;
+    this.hoverCell = false;
+    this.mouseOverX = -1;
+    this.mouseOverY = -1;
+    this.cellsContent = [];
+    this.cellsWithoutEvent = [];
+    this.cellTextColor = '#000000';
+    this.gridColor = '#CCCCCC';
+
     this.boardClicked = this.boardClicked.bind(this);
     this._clearColContentCallback = this._clearColContentCallback.bind(this);
     this._clearRowContentCallback = this._clearRowContentCallback.bind(this);
     this._clearCellContentCallback = this._clearCellContentCallback.bind(this);
     this.changeCellContent = this.changeCellContent.bind(this);
+    this.mouseOverCell = this.mouseOverCell.bind(this);
+    this.mouseOutCell = this.mouseOutCell.bind(this);
   }
 
   connectedCallback() {
@@ -81,8 +109,6 @@ export class BoardCell extends LitElement {
     if (this.onclickCallback && (this.parentElement[this.onclickCallback] || window[this.onclickCallback])) {
       this.addEventListener('click', this.boardClicked);
     }
-    this.cellsContent = [];
-    this.cellsWithoutEvent = [];
     for(let i=0; i<this.rows; i++) {
       this.cellsContent.push([]);
       this.cellsWithoutEvent.push([]);
@@ -90,6 +116,11 @@ export class BoardCell extends LitElement {
         this.cellsContent[i].push(null);
         this.cellsWithoutEvent[i].push(false);
       }
+    }
+    this.style.width = this.rows * this.cellSize + 'px';
+    if (this.hoverCell) {
+      this.addEventListener('mousemove', this.mouseOverCell);
+      this.addEventListener('mouseout', this.mouseOutCell);
     }
     document.addEventListener('board-change-cell-content', this.changeCellContent);
     document.addEventListener('board-clear-cell-content', this._clearCellContentCallback);
@@ -115,6 +146,25 @@ export class BoardCell extends LitElement {
     this.drawBoard();
   }
 
+  mouseOverCell(ev) {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = Math.floor((ev.clientX - rect.left) / this.cellSize);
+    const y = Math.floor((ev.clientY - rect.top) / this.cellSize);
+    if ((x <= this.cols-1 && y <= this.rows-1) && (x >= 0 && y >=0)) {
+      if ((x !== this.mouseOverX || y !== this.mouseOverY) && (this.mouseOverY >= 0 && this.mouseOverX >=0)) {
+        this._drawCellContent(this.mouseOverX * this.cellSize, this.mouseOverY * this.cellSize, this.cellsContent[this.mouseOverX][this.mouseOverY]);
+      }
+      this.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+      this.ctx.fillRect(this.mouseOverX * this.cellSize, this.mouseOverY * this.cellSize, this.cellSize-1, this.cellSize-1);
+      this.mouseOverX = x;
+      this.mouseOverY = y;
+    }
+  }
+
+  mouseOutCell(ev) {
+    this._drawCellContent(this.mouseOverX * this.cellSize, this.mouseOverY * this.cellSize, this.cellsContent[this.mouseOverX][this.mouseOverY]);
+ }
+
   drawBoard() {
     const width = this.rows * this.cellSize;
     const height = this.cols * this.cellSize;
@@ -128,7 +178,7 @@ export class BoardCell extends LitElement {
           this.ctx.moveTo(0, j);
           this.ctx.lineTo(height, j);
         }
-        this.ctx.strokeStyle = '#ccc';
+        this.ctx.strokeStyle = this.gridColor;
         this.ctx.stroke();
       }
     }
@@ -137,33 +187,41 @@ export class BoardCell extends LitElement {
   drawCellsContent() {
     for(let i=0; i<this.rows; i++) {
       for(let j=0; j<this.cols; j++) {
-        const dx = (j - 1) * this.cellSize;
-        const dy = (i - 1) * this.cellSize;
+        const dx = j * this.cellSize;
+        const dy = i * this.cellSize;
         if(this.cellsContent[i][j]) {
           this._drawCellContent(dx, dy, this.cellsContent[i][j]);
         } else {
-          this.ctx.fillStyle = '#FFF';
+          this.ctx.fillStyle = this.gridColor;
           this.ctx.fillRect(dx, dy, this.cellSize, this.cellSize);
         }
       }
     }
+    this.requestUpdate();
   }
 
-  _drawCellContent(x, y, dx, dy) {
-    const content = this.cellsContent[x][y];
+  _drawCellContent(dx, dy, content) {
     if (content.match(/^#[0-9A-F]{6}$/i)) {
       this.ctx.fillStyle = content;
       this.ctx.fillRect(dx, dy, this.cellSize, this.cellSize);
-    } else if (content.match(/^(http|https):\/\/[^ "]+$/i)) {
+    } else if (content.match(/^(http|https):\/\/[^ "]+$/i) || content.match(/(png|jpg|jpeg|gif|svg)$/i)) {
       const img = new Image();
       img.src = content;
       img.onload = () => {
-        this.ctx.drawImage(img, dx, dy, this.cellSize, this.cellSize);
+        this.ctx.drawImage(img, dx, dy, this.cellSize-1, this.cellSize-1);
       }
     } else {
       this.ctx.font = `bold ${this.cellSize/2}px Arial`;
+      this.ctx.fillStyle = this.cellTextColor;
       this.ctx.fillText(content, dx + this.cellSize/2 - 8, dy + this.cellSize/2 + 8);
     }
+    this.requestUpdate();
+  }
+
+  drawCell(x, y) {
+    const dx = x * this.cellSize;
+    const dy = y * this.cellSize;
+    this._drawCellContent(x, y, this.cellsContent[x-1][y-1]);
   }
 
   clearEventCell(x, y) {
@@ -176,7 +234,10 @@ export class BoardCell extends LitElement {
 
   setCellContent(x, y, content) {
     this.cellsContent[x][y] = content;
-    this.requestUpdate();
+  }
+
+  setCellsContent(cells) {
+    this.cellsContent = [...cells];
   }
 
   changeCellContent(ev) {
@@ -186,13 +247,13 @@ export class BoardCell extends LitElement {
       const dx = (detail.cellx - 1) * this.cellSize;
       const dy = (detail.celly - 1) * this.cellSize;
       this.cellsContent[detail.cellx - 1][detail.celly - 1] = content;
-      this._drawCellContent(detail.cellx - 1, detail.celly - 1, dx, dy);
+      this._drawCellContent(dx, dy, this.cellsContent[detail.cellx - 1][detail.celly - 1]);
     }
   }
 
   boardClicked(ev) {
     if (ev.target.id == this.id) {
-      var rect = this.canvas.getBoundingClientRect();
+      const rect = this.canvas.getBoundingClientRect();
       const cellx = Math.floor((ev.clientX - rect.left) / this.cellSize);
       const celly = Math.floor((ev.clientY - rect.top) / this.cellSize);
       const newEvDetail = { detail:

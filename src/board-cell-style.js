@@ -5,6 +5,7 @@ export const BoardCellStyles = css`
     --default-main-color: #000;
     --cell-background-color: #fff;
     --cell-border-color: #ddd;
+    --cell-color: var(--default-main-color);
     margin: 1rem;
     display:flex;
     flex-direction: column;
@@ -20,5 +21,9 @@ export const BoardCellStyles = css`
     padding:0;
     border: var(--cell-border, 1px solid #ddd);
     background-color: var(--cell-background-color, #fff);
+  }
+
+  .cell {
+    color: var(--cell-color, #000);
   }
 `;
