@@ -174,9 +174,9 @@ export class BoardCell extends LitElement {
       for (let j = 0; j <= height; j+=this.cellSize) {
         if (!this.hideCellLines) {
           this.ctx.moveTo(i, 0);
-          this.ctx.lineTo(i, width);
+          this.ctx.lineTo(i, height);
           this.ctx.moveTo(0, j);
-          this.ctx.lineTo(height, j);
+          this.ctx.lineTo(width, j);
         }
         this.ctx.strokeStyle = this.gridColor;
         this.ctx.stroke();
@@ -185,12 +185,12 @@ export class BoardCell extends LitElement {
   }
 
   drawCellsContent() {
-    for(let i=0; i<this.rows; i++) {
-      for(let j=0; j<this.cols; j++) {
-        const dx = j * this.cellSize;
-        const dy = i * this.cellSize;
-        if(this.cellsContent[i][j]) {
-          this._drawCellContent(dx, dy, this.cellsContent[i][j]);
+    for(let row=0; row<this.rows; row++) {
+      for(let col=0; col<this.cols; col++) {
+        const dx = col * this.cellSize;
+        const dy = row * this.cellSize;
+        if(this.cellsContent[col][row]) {
+          this._drawCellContent(dx, dy, this.cellsContent[col][row]);
         } else {
           this.ctx.fillStyle = this.gridColor;
           this.ctx.fillRect(dx, dy, this.cellSize, this.cellSize);
@@ -201,7 +201,7 @@ export class BoardCell extends LitElement {
   }
 
   _drawCellContent(dx, dy, content) {
-    if (content.match(/^#[0-9A-F]{6}$/i)) {
+    if (content.toLowerCase().match(/^#[0-9a-f]{6}$/i)) {
       this.ctx.fillStyle = content;
       this.ctx.fillRect(dx, dy, this.cellSize, this.cellSize);
     } else if (content.match(/^(http|https):\/\/[^ "]+$/i) || content.match(/(png|jpg|jpeg|gif|svg)$/i)) {
