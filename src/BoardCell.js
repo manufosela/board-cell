@@ -204,24 +204,27 @@ export class BoardCell extends LitElement {
     if (content.toLowerCase().match(/^#[0-9a-f]{6}$/i)) {
       this.ctx.fillStyle = content;
       this.ctx.fillRect(dx, dy, this.cellSize, this.cellSize);
+      this.requestUpdate();
     } else if (content.match(/^(http|https):\/\/[^ "]+$/i) || content.match(/(png|jpg|jpeg|gif|svg)$/i)) {
       const img = new Image();
       img.src = content;
       img.onload = () => {
         this.ctx.drawImage(img, dx, dy, this.cellSize-1, this.cellSize-1);
+        this.requestUpdate();
       }
     } else {
       this.ctx.font = `bold ${this.cellSize/2}px Arial`;
       this.ctx.fillStyle = this.cellTextColor;
       this.ctx.fillText(content, dx + this.cellSize/2 - 8, dy + this.cellSize/2 + 8);
+      this.requestUpdate();
     }
-    this.requestUpdate();
+    
   }
 
   drawCell(x, y) {
     const dx = x * this.cellSize;
     const dy = y * this.cellSize;
-    this._drawCellContent(x, y, this.cellsContent[x-1][y-1]);
+    this._drawCellContent(dx, dy, this.cellsContent[x][y]);
   }
 
   clearEventCell(x, y) {
