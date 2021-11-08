@@ -1,3 +1,3 @@
-import { BoardCell } from "./src/BoardCell";
+import { BoardCell } from './src/BoardCell.js';
 
-window.customElements.define(BoardCell.is, BoardCell);
+window.customElements.define('board-cell', BoardCell);

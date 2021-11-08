@@ -1,99 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-GB">
   <head>
-    <title>board-cell demo</title>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes"
-    />
-    <script type="module" src="../board-cell.js"></script>
     <style>
       body {
-        background-color: cyan;
-      }
-      .blocks {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-      }
-      .block {
-        display: flex;
-        flex-direction: column;
-        flex-wrap: wrap;
-        white-space: normal;
-      }
-      .code {
-        padding: 20px;
-        color: #fff;
-        background: #000;
-      }
-      .attributes {
-        padding-left: 20px;
+        background: #fafafa;
       }
     </style>
   </head>
-
   <body>
-    <div class="vertical-section-container centered">
-      <h3>Basic board-cell Demo</h3>
-      <div class="blocks">
-        <pre class="block code">
-          <code>
-            &lt;board-cell id="demo-cell"
+    <div id="demo"></div>
+    <script type="module">
+      import { html, render } from 'lit';
+      import '../board-cell.js';
+
+      render(
+        html`
+          <board-cell
+            id="demo-cell"
             cols="10"
             rows="10"
-            cell-size="32"
+            cell-size="50"
             title="Demo board-cell"
-            hide-cell-lines
-            onclick="cellClick"&gt;&lt;/board-cell&gt;
-          </code>
-        </pre>
-        <pre class="block attributes">
-          <h3>Attributes</h3>
-          <ul>
-            <li>cols (Number)</li>
-            <li>rows (Number)</li>
-            <li>cell-size (Number)</li>
-            <li>title (String)</li>
-            <li>show-cell-lines (Boolean)</li>
-            <li>onclick (String)</li>
-          </ul>
-        </pre>
-      </div>
-
-      <board-cell
-        id="demo-cell"
-        cols="10"
-        rows="10"
-        cell-size="50"
-        title="Demo board-cell"
-        onclick="cellClick"
-      >
-      </board-cell>
-
-      <script>
-        const color = Math.floor(Math.random() * 16777215).toString(16);
-        function cellClick(ev) {
-          console.log(ev.detail);
-          if (ev.detail.content === null) {
-            const drawCell = new CustomEvent("board-change-cell-content", {
-              detail: {
-                id: "demo-cell",
-                cellx: ev.detail.cellx,
-                celly: ev.detail.celly,
-                content: `#${color}`,
-              },
-            });
-            document.dispatchEvent(drawCell);
-          }
+            onclick="cellClick"
+          >
+          </board-cell>
+        `,
+        document.querySelector('#demo')
+      );
+    </script>
+    <script>
+      const color = Math.floor(Math.random() * 16777215).toString(16);
+      function cellClick(ev) {
+        console.log(ev.detail);
+        if (ev.detail.content === null) {
+          const drawCell = new CustomEvent('board-change-cell-content', {
+            detail: {
+              id: 'demo-cell',
+              cellx: ev.detail.cellx,
+              celly: ev.detail.celly,
+              content: `#${color}`,
+            },
+          });
+          document.dispatchEvent(drawCell);
         }
+      }
 
-        window.onload = function () {
-          const board = document.querySelector("board-cell");
+      function wcReady(ev) {
+        const { id, wcTag } = ev.detail;
+        if (wcTag === 'board-cell' && id === 'demo-cell') {
+          const board = document.getElementById(id);
           board.clearEventCell(1, 1);
-        };
-      </script>
-    </div>
+        }
+      }
+
+      document.addEventListener('wc-Ready', wcReady);
+    </script>
   </body>
 </html>
