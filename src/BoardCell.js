@@ -1,5 +1,5 @@
-import { LitElement, html } from "lit-element";
-import { BoardCellStyles } from "./board-cell-style";
+import { LitElement, html } from "lit";
+import { BoardCellStyles } from "./board-cell-style.js";
 
 /**
  * `board-cell`
@@ -117,7 +117,7 @@ export class BoardCell extends LitElement {
         this.cellsWithoutEvent[i].push(false);
       }
     }
-    this.style.width = this.rows * this.cellSize + 'px';
+    this.style.width = `${this.rows * this.cellSize  }px`;
     if (this.hoverCell) {
       this.addEventListener('mousemove', this.mouseOverCell);
       this.addEventListener('mouseout', this.mouseOutCell);
@@ -135,6 +135,10 @@ export class BoardCell extends LitElement {
     if (this.onclickCallback && (this.parentElement[this.onclickCallback] || window[this.onclickCallback])) {
       this.removeEventListener('click', this.boardClicked);
     }
+    if (this.hoverCell) {
+      this.removeEventListener('mousemove', this.mouseOverCell);
+      this.removeEventListener('mouseout', this.mouseOutCell);
+    }
     document.removeEventListener('board-change-cell-content', this.changeCellContent);
     document.removeEventListener('board-clear-cell-content', this._clearCellContentCallback);
     document.removeEventListener('board-clear-all-content', this._clearAllContentCallback);
@@ -143,7 +147,14 @@ export class BoardCell extends LitElement {
   }
 
   firstUpdated() {
+    const wcReadyEvent = new CustomEvent('wc-ready', {
+      detail: {
+        id: this.id,
+        wcTag: this.is,
+      }
+    });
     this.drawBoard();
+    document.dispatchEvent(wcReadyEvent);
   }
 
   mouseOverCell(ev) {
@@ -245,8 +256,8 @@ export class BoardCell extends LitElement {
 
   changeCellContent(ev) {
     if (ev.detail.id == this.id) {
-      const detail = ev.detail;
-      const content = detail.content;
+      const {detail} = ev;
+      const {content} = detail;
       const dx = (detail.cellx - 1) * this.cellSize;
       const dy = (detail.celly - 1) * this.cellSize;
       this.cellsContent[detail.cellx - 1][detail.celly - 1] = content;
