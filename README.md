@@ -60,7 +60,6 @@ To build a production version of Storybook, run
 npm run storybook:build
 ```
 
-
 ## Tooling configs
 
 For most of the tools, the configuration is in the `package.json` to minimize the amount of files in your project.
@@ -74,3 +73,31 @@ npm start
 ```
 
 To run a local development server that serves the basic demo located in `demo/index.html`
+
+# USE
+
+## Global Events
+
+The webcomponent listens the next global events:
+
+- board-cell-refresh: to show the data from the board
+- board-cell-change-data: to change the data of the board, but not refresh the board drawing
+- board-cell-change-all-cell-data: to change the data of all the cells, but not refresh the board drawing
+- board-cell-change-cell-content: to change the content of a cell and show it in the board
+- board-cell-clear-cell-content: to clear the content of a cell
+- board-cell-clear-all-content: to clear the content of all cells
+- board-cell-content-clear-row: to clear the content of all cells in a row
+- board-cell-content-clear-col: to clear the content of all cells in a column
+
+All events fired must have the following structure the **id** of the web-component.
+
+## Local events
+
+The webcomponent listen the nex local events:
+
+- click: When a cell is clicked execute the `onClick` callback, passed by attribute.
+- mouseover and mouseout: if the **hover-cell** attribute is true.
+
+## Events disptach
+
+- wc-ready: dispatch this event when firstUpdate is done
