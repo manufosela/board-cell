@@ -86,6 +86,11 @@ export class BoardCell extends LitElement {
 
   constructor() {
     super();
+    this.cols = 5;
+    this.rows = 5;
+    this.cellSize = 50;
+    this.title = 'board-cell';
+    this.id = `board-cell-${Math.random().toString(36).substring(2, 15)}`;
     this.hideCellLines = false;
     this.hoverCell = false;
     this.mouseOverX = -1;
