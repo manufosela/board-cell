@@ -222,17 +222,17 @@ export class BoardCell extends LitElement {
  }
 
   drawBoard() {
-    const width = this.rows * this.cellSize;
-    const height = this.cols * this.cellSize;
+    const width = this.cols * this.cellSize;
+    const height = this.rows * this.cellSize;
     this.canvas = this.shadowRoot.querySelector('canvas');
     this.ctx = this.canvas.getContext('2d');
-    for (let i = 0; i <= width; i+=this.cellSize) {
-      for (let j = 0; j <= height; j+=this.cellSize) {
+    for (let w = 0; w <= width; w+=this.cellSize) {
+      for (let h = 0; h <= height; h+=this.cellSize) {
         if (!this.hideCellLines) {
-          this.ctx.moveTo(i, 0);
-          this.ctx.lineTo(i, height);
-          this.ctx.moveTo(0, j);
-          this.ctx.lineTo(width, j);
+          this.ctx.moveTo(w, 0);
+          this.ctx.lineTo(w, height);
+          this.ctx.moveTo(0, h);
+          this.ctx.lineTo(width, h);
         }
         this.ctx.strokeStyle = this.gridColor;
         this.ctx.stroke();
