@@ -3,7 +3,7 @@
   "description": "Webcomponent board-cell following open-wc recommendations",
   "license": "MIT",
   "author": "board-cell",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "main": "index.js",
   "module": "index.js",
   "scripts": {
