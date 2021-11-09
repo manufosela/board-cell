@@ -10,13 +10,48 @@ npm i board-cell
 
 ## Usage
 
+From npm package:
+
 ```html
 <script type="module">
   import 'board-cell/board-cell.js';
 </script>
+```
 
+Or from skypack cdn:
+
+```html
+<script type="module">
+  import boardCell from 'https://cdn.skypack.dev/board-cell';
+</script>
+```
+
+To create simple default board-cell 5x5 board with 50px cell size:
+
+```html
 <board-cell></board-cell>
 ```
+
+To create board-cell 10x10 with 50px cell size:
+
+```html
+<board-cell rows="10" cols="10" cell-size="50"></board-cell>
+```
+
+To create more complete board-cell 10x10 with 50px cell size, with title, id and onclick event callback:
+
+```html
+<board-cell
+  id="demo-cell"
+  cols="10"
+  rows="10"
+  cell-size="50"
+  title="Demo board-cell"
+  onclick="cellClick"
+></board-cell>
+```
+
+Where: cellclick is a callback function defined by the user
 
 ## Linting and formatting
 
