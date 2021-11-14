@@ -72,6 +72,12 @@ export class BoardCell extends LitElement {
        */
       gridColor: { type: String, attribute: 'grid-color' },
       /**
+       * Cell background color
+       * @property
+       * @type { String }
+       */
+       backgroundColor: { type: String, attribute: 'cell-bg-color' },
+      /**
        * Callback function to be called when the board is clicked
        * @property
        * @type { String }
@@ -99,6 +105,7 @@ export class BoardCell extends LitElement {
     this.cellsWithoutEvent = [];
     this.cellTextColor = '#000000';
     this.gridColor = '#CCCCCC';
+    this.backgroundColor = '#FFFFFF';
 
     this.boardClicked = this.boardClicked.bind(this);
     this.setCellData = this.setCellData.bind(this);
@@ -234,6 +241,8 @@ export class BoardCell extends LitElement {
           this.ctx.moveTo(0, h);
           this.ctx.lineTo(width, h);
         }
+        this.ctx.fillStyle = this.backgroundColor;
+        this.ctx.fillRect(w, h, this.cellSize, this.cellSize);
         this.ctx.strokeStyle = this.gridColor;
         this.ctx.stroke();
       }
@@ -411,7 +420,7 @@ export class BoardCell extends LitElement {
   render() {
     return html`
       <h1>${this.title}</h1>
-      <canvas id="${this.id}_canvas" width="${this.cols * this.cellSize}" height="${this.rows * this.cellSize}" class="board"></canvas>
+      <canvas id="${this.id}_canvas" width="${this.cols * this.cellSize}" height="${this.rows * this.cellSize}" class="board" role="img" aria-label="canvas with board" alt="Mineswipper board with ${this.cols}x${this.rows}"></canvas>
     `;
   }
 
