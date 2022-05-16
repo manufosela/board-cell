@@ -96,7 +96,7 @@ export class BoardCell extends LitElement {
     this.rows = 5;
     this.cellSize = 50;
     this.title = 'board-cell';
-    this.id = `board-cell-${Math.random().toString(36).substring(2, 15)}`;
+    this.id = `board-cell__${Math.random().toString(36).substring(2, 15)}`;
     this.hideCellLines = false;
     this.hoverCell = false;
     this.mouseOverX = -1;
@@ -124,14 +124,7 @@ export class BoardCell extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    for(let i=0; i<this.rows; i+=1) {
-      this.cellsContent.push([]);
-      this.cellsWithoutEvent.push([]);
-      for(let j=0; j<this.cols; j+=1) {
-        this.cellsContent[i].push(null);
-        this.cellsWithoutEvent[i].push(false);
-      }
-    }
+    this._initializeCells();
     this.style.width = `${this.rows * this.cellSize  }px`;
     this._enableBoardEvents();
   }
@@ -145,7 +138,8 @@ export class BoardCell extends LitElement {
     const wcReadyEvent = new CustomEvent('wc-ready', {
       detail: {
         id: this.id,
-        wcTag: this.is,
+        componentName: this.tagName,
+        component: this,
       }
     });
     this.drawBoard();
@@ -158,24 +152,34 @@ export class BoardCell extends LitElement {
     }
   }
 
+  _initializeCells() {
+    for(let i=0; i<this.rows; i+=1) {
+      this.cellsContent.push([]);
+      this.cellsWithoutEvent.push([]);
+      for(let j=0; j<this.cols; j+=1) {
+        this.cellsContent[i].push(null);
+        this.cellsWithoutEvent[i].push(false);
+      }
+    }
+  }
+
   _enableBoardEvents() {
     this._enableBoardClick();
     if (this.hoverCell) {
       this.addEventListener('mousemove', this.mouseOverCell);
       this.addEventListener('mouseout', this.mouseOutCell);
     }
-    document.addEventListener('board-cell-content-refresh', this.contentRefresh);
-    document.addEventListener('board-cell-change-cell-data', this.setCellData);
-    document.addEventListener('board-cell-change-all-cell-data', this.setCellsData);
-    document.addEventListener('board-cell-change-cell-content', this.changeCellContent);
-    document.addEventListener('board-cell-change-cells-content', this.changeCellsContent);
-    document.addEventListener('board-cell-clear-cell-content', this._clearCellContentCallback);
-    document.addEventListener('board-cell-clear-all-content', this._clearAllContentCallback);
-    document.addEventListener('board-cell-content-clear-row', this._clearRowContentCallback)
-    document.addEventListener('board-cell-content-clear-col', this._clearColContentCallback);
-    document.addEventListener('board-cell-enable-board-click', this._enableBoardClick);
-    document.addEventListener('board-cell-disable-board-click', this._disableBoardClick);
-    // this.addEventListener('DOMSubtreeModified', this.cellContentChange);
+    document.addEventListener('board-cell__content-refresh', this.contentRefresh);
+    document.addEventListener('board-cell__change-cell-data', this.setCellData);
+    document.addEventListener('board-cell__change-all-cell-data', this.setCellsData);
+    document.addEventListener('board-cell__change-cell-content', this.changeCellContent);
+    document.addEventListener('board-cell__change-cells-content', this.changeCellsContent);
+    document.addEventListener('board-cell__clear-cell-content', this._clearCellContentCallback);
+    document.addEventListener('board-cell__clear-all-content', this._clearAllContentCallback);
+    document.addEventListener('board-cell__content-clear-row', this._clearRowContentCallback)
+    document.addEventListener('board-cell__content-clear-col', this._clearColContentCallback);
+    document.addEventListener('board-cell__enable-board-click', this._enableBoardClick);
+    document.addEventListener('board-cell__disable-board-click', this._disableBoardClick);
   }
 
   _disableBoardClick() {
@@ -190,17 +194,17 @@ export class BoardCell extends LitElement {
       this.removeEventListener('mousemove', this.mouseOverCell);
       this.removeEventListener('mouseout', this.mouseOutCell);
     }
-    document.removeEventListener('board-cell-content-refresh', this.contentRefresh);
-    document.removeEventListener('board-cell-change-cell-data', this.setCellData);
-    document.removeEventListener('board-cell-change-all-cell-data', this.setCellsData);
-    document.removeEventListener('board-cell-change-cell-content', this.changeCellContent);
-    document.removeEventListener('board-cell-change-cells-content', this.changeCellsContent);
-    document.removeEventListener('board-cell-clear-cell-content', this._clearCellContentCallback);
-    document.removeEventListener('board-cell-clear-all-content', this._clearAllContentCallback);
-    document.removeEventListener('board-cell-content-clear-row', this._clearRowContentCallback)
-    document.removeEventListener('board-cell-content-clear-col', this._clearColContentCallback);
-    document.removeEventListener('board-cell-enable-board-click', this._enableBoardClick);
-    document.removeEventListener('board-cell-disable-board-click', this._disableBoardClick);
+    document.removeEventListener('board-cell__content-refresh', this.contentRefresh);
+    document.removeEventListener('board-cell__change-cell-data', this.setCellData);
+    document.removeEventListener('board-cell__change-all-cell-data', this.setCellsData);
+    document.removeEventListener('board-cell__change-cell-content', this.changeCellContent);
+    document.removeEventListener('board-cell__change-cells-content', this.changeCellsContent);
+    document.removeEventListener('board-cell__clear-cell-content', this._clearCellContentCallback);
+    document.removeEventListener('board-cell__clear-all-content', this._clearAllContentCallback);
+    document.removeEventListener('board-cell__content-clear-row', this._clearRowContentCallback)
+    document.removeEventListener('board-cell__content-clear-col', this._clearColContentCallback);
+    document.removeEventListener('board-cell__enable-board-click', this._enableBoardClick);
+    document.removeEventListener('board-cell__disable-board-click', this._disableBoardClick);
   }
 
   contentRefresh(e) {
