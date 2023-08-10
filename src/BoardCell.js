@@ -135,22 +135,22 @@ export class BoardCell extends LitElement {
     this._disableBoardEvents();
   }
 
-  firstUpdated() {
-    const wcReadyEvent = new CustomEvent('wc-ready', {
-      detail: {
-        id: this.id,
-        componentName: this.tagName,
-        component: this,
-      },
-    });
-    this.drawBoard();
-    document.dispatchEvent(wcReadyEvent);
+  static encontrarAncestroMasAlto(elemento) {
+    let ancestroActual = elemento.parentNode;
+    while (ancestroActual.parentNode) {
+      ancestroActual = ancestroActual.parentNode;
+    }
+    return ancestroActual;
   }
 
   _enableBoardClick() {
+    const ancestroMasAlto = BoardCell.encontrarAncestroMasAlto(this);
+    console.log(ancestroMasAlto);
     if (
       this.onclickCallback &&
-      (this.parentElement[this.onclickCallback] || window[this.onclickCallback])
+      (this.parentElement[this.onclickCallback] ||
+        window[this.onclickCallback] ||
+        ancestroMasAlto[this.onclickCallback])
     ) {
       this.addEventListener('click', this.boardClicked);
     }
@@ -465,6 +465,11 @@ export class BoardCell extends LitElement {
           this.parentElement[this.onclickCallback](newEvDetail);
         } else if (window[this.onclickCallback]) {
           window[this.onclickCallback](newEvDetail);
+        } else {
+          const ancestroMasAlto = BoardCell.encontrarAncestroMasAlto(this);
+          if (ancestroMasAlto[this.onclickCallback]) {
+            ancestroMasAlto[this.onclickCallback](newEvDetail);
+          }
         }
       }
     }
@@ -528,6 +533,24 @@ export class BoardCell extends LitElement {
     if (ev.detail.id === this.id) {
       this.clearAllContent();
     }
+  }
+
+  updated(changedProperties) {
+    if (changedProperties.has('cols') || changedProperties.has('rows')) {
+      this.drawBoard();
+    }
+  }
+
+  firstUpdated() {
+    const wcReadyEvent = new CustomEvent('wc-ready', {
+      detail: {
+        id: this.id,
+        componentName: this.tagName,
+        component: this,
+      },
+    });
+    this.drawBoard();
+    document.dispatchEvent(wcReadyEvent);
   }
 
   render() {
