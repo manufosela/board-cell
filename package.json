@@ -3,10 +3,8 @@
   "description": "Webcomponent board-cell following open-wc recommendations",
   "license": "MIT",
   "author": "@manufosela",
-  "version": "2.4.7",
+  "version": "2.5.0",
   "main": "board-cell.js",
-  "module": "board-cell.js",
-  "type": "module",
   "keywords": [
     "webcomponent",
     "lit"
@@ -27,7 +25,7 @@
     "build": "rm -fr dist/* && rollup -c"
   },
   "dependencies": {
-    "lit": "^2.0.2"
+    "lit": "^2.8.0"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.4.17",

@@ -6,44 +6,47 @@
       body {
         background: #fafafa;
       }
+      #demo {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
     </style>
   </head>
   <body>
-    <div id="demo"></div>
-    <script type="module">
-      import { html, render } from 'lit';
-      import '../board-cell.js';
-
-      render(
-        html`
-          <board-cell
-            id="demo-cell"
-            cols="10"
-            rows="10"
-            cell-size="50"
-            title="Demo board-cell"
-            onclick="cellClick"
-          >
-          </board-cell>
-        `,
-        document.querySelector('#demo')
-      );
-    </script>
+    <div id="demo">
+      <board-cell
+        id="demo-cell"
+        cols="10"
+        rows="10"
+        cell-size="50"
+        title="Demo board-cell"
+        onclick="cellClick"
+      >
+      </board-cell>
+      <div id="datos"></div>
+    </div>
+    <script type="module" src="../board-cell.js"></script>
     <script>
       const color = Math.floor(Math.random() * 16777215).toString(16);
+      const content = 'X';
+      // eslint-disable-next-line no-unused-vars
       function cellClick(ev) {
-        console.log(ev.detail);
-        if (ev.detail.content === null) {
-          const drawCell = new CustomEvent('board-change-cell-content', {
-            detail: {
-              id: 'demo-cell',
-              cellx: ev.detail.cellx,
-              celly: ev.detail.celly,
-              content: `#${color}`,
-            },
-          });
-          document.dispatchEvent(drawCell);
-        }
+        const cellInfo = ev.detail;
+        // console.log(cellInfo);
+        const drawCell = new CustomEvent('board-cell__change-cell-content', {
+          detail: {
+            id: 'demo-cell',
+            cellx: cellInfo.cellx,
+            celly: cellInfo.celly,
+            color: `#${color}`,
+            content: `${content}`,
+          },
+        });
+        document.dispatchEvent(drawCell);
+        document.querySelector('#datos').innerHTML = `Cell: ${cellInfo.cellx + 1}, ${cellInfo.celly + 1} - Color: ${color} Content: ${content}`;
       }
 
       function wcReady(ev) {
