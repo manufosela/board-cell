@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <title>3 en 3 en Raya Game - board-cell demo</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes"
+    />
+    <link rel="stylesheet" href="./3en3enraya.css" />
+  </head>
+  <body>
+    <aside id="fichas">      
+    </aside>
+    <div id="container">
+      <board-cell
+        id="3en3enraya-cell"
+        cols="3"
+        rows="3"
+        cell-size="150"
+        title="3 en 3 en raya"
+        onclick="cellClick"
+      >
+      </board-cell>
+      <div id="datos">
+        <p>Turno: <span id="turno">Jugador 1 - X</span></p>
+        <p id="ganador"></p>
+      </div>
+    </div>
+    <script type="module" src="../../board-cell.js"></script>
+    <script src="./3en3enraya.js"></script>
+  </body>
+</html>

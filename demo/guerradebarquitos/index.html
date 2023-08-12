@@ -1,0 +1,71 @@
+<!--
+ Copyright 2021 manufosela
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Guerra de barquitos - board-cell demo</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes"
+    />
+    <link rel="stylesheet" href="guerradebarquitos.css" />
+  </head>
+
+  <body>
+    <h1>Battleship</h1>
+    <main id="game" class="game">
+      <section id="boards" class="boards"></section>
+      <section id="ships" class="ships">
+        <section class="buttons">
+          <button id="randomposition">Random Position</button>
+          <button id="clearall">Clear All</button>
+          <button id="startgame">Start Game</button>
+          <button id="gamerules">Game Rules</button>
+        </section>
+        <section id="shipsImages">
+          <ul>
+            <li><img id="ship1A" data-ship="0" src="imagenes/1.png" alt="ship1"></li>
+            <li><img id="ship1B" data-ship="0" src="imagenes/1.png" alt="ship1"></li>
+            <li><img id="ship1C" data-ship="0" src="imagenes/1.png" alt="ship1"></li>
+            <li><img id="ship1D" data-ship="0" src="imagenes/1.png" alt="ship1"></li>
+          </ul>
+          <ul>
+            <li><img id="ship2A" data-ship="1" src="imagenes/2.png" alt="ship2"></li>
+            <li><img id="ship2B" data-ship="1" src="imagenes/2.png" alt="ship2"></li>
+            <li><img id="ship2C" data-ship="1" src="imagenes/2.png" alt="ship2"></li>
+          </ul>
+          <ul>
+            <li><img id="ship3A" data-ship="2" src="imagenes/3.png" alt="ship3"></li>
+            <li><img id="ship3B" data-ship="2" src="imagenes/3.png" alt="ship3"></li>
+          </ul>
+          <ul>
+            <li><img id="ship4A" data-ship="3" src="imagenes/4.png" alt="ship4"></li>
+          </ul>
+        </section>
+      </section>
+    </main>
+    <div class="modal-overlay" id="modalOverlay" style="display: none;">
+      <div class="modal-content" id="modalContent">
+        <p id="modalMessage"></p>
+        <button id="closeModalBtn">Close</button>
+      </div>
+    </div>
+
+    <script src="guerradebarquitos.js"></script>
+    <script type="module" src="../../board-cell.js"></script>
+  </body>
+</html>

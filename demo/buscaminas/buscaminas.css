@@ -1,0 +1,33 @@
+.game {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.btn-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+.btn-group > button {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+.minesRemaining {
+  padding: 1rem;
+  font-size: 1.5rem;
+}
+.modal {
+  flex-direction: column;
+}
+.selected {
+  background: #09f;
+  border: 3px solid red;
+}
+
+board-cell {
+  --cell-border-color: #fff;
+}
