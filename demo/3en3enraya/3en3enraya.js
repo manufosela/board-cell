@@ -2,6 +2,13 @@ const colors = ['red', 'green'];
 const fichas = ['oRed', 'oGreen'];
 const sizes = ['Big', 'Mid', 'Small'];
 
+let board;
+const boardSize = 3;
+const cellSize = 150;
+const fontSize = 12;
+const idGame = '3en3enraya';
+const titleGame = '3 en 3 en raya';
+
 let highlights = [];
 let concentricos = false;
 let fichasTotal = 0;
@@ -34,8 +41,7 @@ function drawLineThroughCells(start, end) {
   const startY = start[1];
   const endX = end[0];
   const endY = end[1];
-  const board = document.getElementById('3en3enraya-cell');
-  const { cellSize, ctx } = board;
+  const { ctx } = board;
   const startXPos = startX * cellSize + cellSize / 2;
   const startYPos = startY * cellSize + cellSize / 2;
   const endXPos = endX * cellSize + cellSize / 2;
@@ -49,7 +55,6 @@ function drawLineThroughCells(start, end) {
 }
 
 function fillCell(cellInfo) {
-  const board = document.getElementById('3en3enraya-cell');
   board.drawBorder(cellInfo.cellx, cellInfo.celly, colors[ganador], 10);
 }
 
@@ -188,7 +193,7 @@ function comprobarGanador(_size, cellInfo) {
 function changeCellContent(cellInfo, _content, _color) {
   const drawCellEvent = new CustomEvent('board-cell__change-cell-content', {
     detail: {
-      id: '3en3enraya-cell',
+      id: idGame,
       cellx: cellInfo.cellx,
       celly: cellInfo.celly,
       color: _color,
@@ -270,11 +275,31 @@ function cellClick(ev) {
 
 function wcReady(ev) {
   const { id, componentName } = ev.detail;
-  if (componentName === 'BOARD-CELL' && id === '3en3enraya-cell') {
+  if (componentName === 'BOARD-CELL' && id === idGame) {
     drawTurnCircles();
   }
 }
 
-document.addEventListener('wc-ready', wcReady);
-
 document.getElementById('fichas').addEventListener('click', putFicha);
+
+function createBoard(parentNode) {
+  const boardCell = document.createElement('board-cell');
+  boardCell.setAttribute('id', idGame);
+  boardCell.setAttribute('cols', boardSize);
+  boardCell.setAttribute('rows', boardSize);
+  boardCell.setAttribute('undo', 'true');
+  boardCell.setAttribute('cell-size', cellSize);
+  boardCell.setAttribute('font-size', fontSize);
+  boardCell.setAttribute('title', titleGame);
+  boardCell.setAttribute('onclick', 'cellClick');
+  parentNode.appendChild(boardCell);
+
+  return boardCell;
+}
+
+function init() {
+  document.addEventListener('wc-ready', wcReady);
+  board = createBoard(document.getElementById('game'));
+}
+
+window.onload = init();
