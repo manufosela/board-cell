@@ -3,7 +3,7 @@
   "description": "Webcomponent board-cell following open-wc recommendations",
   "license": "MIT",
   "author": "@manufosela",
-  "version": "2.5.2",
+  "version": "2.5.3",
   "main": "board-cell.js",
   "keywords": [
     "webcomponent",

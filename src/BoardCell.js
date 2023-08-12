@@ -423,9 +423,19 @@ export class BoardCell extends LitElement {
       const img = new Image();
       img.src = content;
       img.onload = () => {
-        const dxNow = cellx; // + (this.cellSize - img.width) / 2; // Coordenada x para centrar la imagen horizontalmente
-        const dyNow = celly; // + (this.cellSize - img.height) / 2;
-        this.ctx.drawImage(img, dxNow, dyNow, this.cellSize, this.cellSize);
+        const dxNow =
+          this.cellSize > img.width
+            ? cellx + (this.cellSize - img.width) / 2
+            : cellx;
+        const dyNow =
+          this.cellSize > img.height
+            ? celly + (this.cellSize - img.height) / 2
+            : celly;
+        const imgSizeX = this.cellSize > img.width ? img.width : this.cellSize;
+        const imgSizeY =
+          this.cellSize > img.height ? img.height : this.cellSize;
+        // console.log(`(x,y): (${dxNow}, ${dyNow}) Img Size: ${imgSizeX}x${imgSizeY}`);
+        this.ctx.drawImage(img, dxNow, dyNow, imgSizeX, imgSizeY);
       };
     } else {
       this.ctx.font = `bold ${this.fontSize}px Arial`;
