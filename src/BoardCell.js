@@ -42,11 +42,31 @@ export class BoardCell extends LitElement {
        */
       cellSize: { type: Number, attribute: 'cell-size' },
       /**
+       * Font size in pixels
+       * @property
+       * @type { Number }
+       * @attribute
+       */
+      fontSize: { type: Number, attribute: 'font-size' },
+      /**
        * Board title
        * @property
        * @type { String }
        */
       title: { type: String },
+      /**
+       * Allow undo cell content with second click
+       * @property
+       * @type { Boolean }
+       */
+      undo: { type: Boolean },
+      restoreContent: { type: String },
+      /**
+       * Redraw cells when click in a cell
+       * @property
+       * @type { Boolean }
+       */
+      redrawCells: { type: Boolean, attribute: 'redraw-cells' },
       /**
        * Change appaerance cell when hovering
        * @property
@@ -95,18 +115,24 @@ export class BoardCell extends LitElement {
     this.cols = 5;
     this.rows = 5;
     this.cellSize = 50;
+    this.fontSize = this.cellSize * 0.5;
     this.title = 'board-cell';
     this.id = `board-cell__${Math.random().toString(36).substring(2, 15)}`;
     this.hideCellLines = false;
     this.hoverCell = false;
+    this.undo = false;
+    this.redrawCells = false;
     this.mouseOverX = -1;
     this.mouseOverY = -1;
     this.cellsBgColor = [];
+    this.cellsTextColor = [];
     this.cellsContent = [];
     this.cellsWithoutEvent = [];
     this.cellTextColor = '#000000';
+    this.cellBgColor = '#FFFFFF';
     this.gridColor = '#CCCCCC';
     this.backgroundColor = '#FFFFFF';
+    this.restoreContent = '';
 
     this.boardClicked = this.boardClicked.bind(this);
     this.setCellData = this.setCellData.bind(this);
@@ -115,6 +141,7 @@ export class BoardCell extends LitElement {
     this._clearColContentCallback = this._clearColContentCallback.bind(this);
     this._clearRowContentCallback = this._clearRowContentCallback.bind(this);
     this._clearCellContentCallback = this._clearCellContentCallback.bind(this);
+    this._clearAllContentCallback = this._clearAllContentCallback.bind(this);
     this.changeCellContent = this.changeCellContent.bind(this);
     this.changeCellsContent = this.changeCellsContent.bind(this);
     this.mouseOverCell = this.mouseOverCell.bind(this);
@@ -147,10 +174,12 @@ export class BoardCell extends LitElement {
   _initializeCells() {
     for (let i = 0; i < this.rows; i += 1) {
       this.cellsBgColor.push([]);
+      this.cellsTextColor.push([]);
       this.cellsContent.push([]);
       this.cellsWithoutEvent.push([]);
       for (let j = 0; j < this.cols; j += 1) {
         this.cellsBgColor[i].push(null);
+        this.cellsTextColor[i].push(null);
         this.cellsContent[i].push(null);
         this.cellsWithoutEvent[i].push(false);
       }
@@ -273,6 +302,12 @@ export class BoardCell extends LitElement {
     }
   }
 
+  _updateCellData(x, y, content, textColor, bgColor = 'transparent') {
+    this.cellsContent[x][y] = content;
+    this.cellsTextColor[x][y] = textColor;
+    this.cellsBgColor[x][y] = bgColor;
+  }
+
   mouseOverCell(ev) {
     const rect = this.canvas.getBoundingClientRect();
     const x = Math.floor((ev.clientX - rect.left) / this.cellSize);
@@ -345,27 +380,76 @@ export class BoardCell extends LitElement {
     }
   }
 
-  _drawCellContent(dx, dy, content, color) {
-    this.ctx.fillStyle = color;
-    this.ctx.fillRect(dx, dy, this.cellSize, this.cellSize);
+  fillBgColor(cellx, celly, bgColor) {
+    this.ctx.fillStyle = bgColor;
+    this.ctx.fillRect(
+      cellx * this.cellSize,
+      celly * this.cellSize,
+      this.cellSize,
+      this.cellSize
+    );
+  }
+
+  drawBorder(cellx, celly, color, borderWith = 1) {
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = borderWith;
+    this.ctx.strokeRect(
+      cellx * this.cellSize,
+      celly * this.cellSize,
+      this.cellSize,
+      this.cellSize
+    );
+  }
+
+  _drawCellContent(
+    cellx,
+    celly,
+    content = '',
+    color = this.cellTextColor,
+    bgColor = this.cellBgColor
+  ) {
+    // console.log(this.cellsContent[dx/this.cellSize][dy/this.cellSize]);
+    if (
+      this.redrawCells ||
+      !this.cellsContent[cellx / this.cellSize][celly / this.cellSize]
+    ) {
+      this.fillBgColor(cellx, celly, bgColor);
+    }
 
     if (
       content.match(/^(http|https):\/\/[^ "]+$/i) ||
-      content.match(/(png|jpg|jpeg|gif|svg)$/i)
+      content.match(/(png|jpg|jpeg|gif|webp)$/i)
     ) {
       const img = new Image();
       img.src = content;
       img.onload = () => {
-        this.ctx.drawImage(img, dx, dy, this.cellSize - 1, this.cellSize - 1);
+        const dxNow = cellx; // + (this.cellSize - img.width) / 2; // Coordenada x para centrar la imagen horizontalmente
+        const dyNow = celly; // + (this.cellSize - img.height) / 2;
+        this.ctx.drawImage(img, dxNow, dyNow, this.cellSize, this.cellSize);
       };
     } else {
-      this.ctx.font = `bold ${this.cellSize / 2}px Arial`;
-      this.ctx.fillStyle = this.cellTextColor;
+      this.ctx.font = `bold ${this.fontSize}px Arial`;
+      this.ctx.textAlign = 'center';
+      this.ctx.textBaseline = 'middle';
+      this.ctx.fillStyle = color;
       this.ctx.fillText(
         content,
-        dx + this.cellSize / 2 - 8,
-        dy + this.cellSize / 2 + 8
+        cellx + this.cellSize / 2,
+        celly + this.cellSize / 2
       );
+    }
+
+    if (
+      content === '' ||
+      !this.cellsContent[cellx / this.cellSize][celly / this.cellSize]
+    ) {
+      // Definir los bordes de la celda
+      this.ctx.beginPath();
+      this.ctx.rect(cellx, celly, this.cellSize, this.cellSize); // Delimitar el área de la celda
+      this.ctx.strokeStyle = this.gridColor;
+      this.ctx.stroke();
+      this.ctx.closePath();
+      this.ctx.stroke();
     }
   }
 
@@ -387,6 +471,10 @@ export class BoardCell extends LitElement {
     this.cellsContent[x][y] = content;
   }
 
+  getCellContent(x, y) {
+    return this.cellsContent[x][y];
+  }
+
   setCellData(e) {
     if (e.detail.id === this.id) {
       this.setCellContent(e.detail.x, e.detail.y, e.detail.content);
@@ -403,32 +491,47 @@ export class BoardCell extends LitElement {
     }
   }
 
+  _checkContent(detail) {
+    // console.log(this.cellsContent[detail.cellx][detail.celly], detail.content, this.undo);
+    if (
+      this.cellsContent[detail.cellx][detail.celly] === detail.content &&
+      this.undo
+    ) {
+      return [this.restoreContent, detail.color, detail.bgColor];
+    }
+    return [detail.content, detail.color, detail.bgcolor];
+  }
+
   changeCellContent(ev) {
     if (ev.detail.id === this.id) {
       const { detail } = ev;
-      const { content, color } = detail;
       const dx = detail.cellx * this.cellSize;
       const dy = detail.celly * this.cellSize;
-      this.cellsBgColor[detail.cellx][detail.celly] = color;
-      this.cellsContent[detail.cellx][detail.celly] = content;
-      this._drawCellContent(
-        dx,
-        dy,
-        this.cellsContent[detail.cellx][detail.celly],
-        this.cellsBgColor[detail.cellx][detail.celly]
+      const [
+        content = '',
+        textColor = this.textColor,
+        bgColor = this.backgroundColor,
+      ] = this._checkContent(detail);
+      // console.log(color, content);
+      this._drawCellContent(dx, dy, content, textColor, bgColor);
+      this._updateCellData(
+        detail.cellx,
+        detail.celly,
+        content,
+        textColor,
+        bgColor
       );
-      this.boardClicked(ev);
     }
   }
 
   changeCellsContent(ev) {
     if (ev.detail.id === this.id) {
       const { detail } = ev;
-      const { content, color } = detail;
+      const { content, color, bgcolor } = detail;
       this.cellsContent = [...content];
-      this.cellsBgColor = [...color];
+      this.cellsTextColor = [...color];
+      this.cellsBgColor = [...bgcolor];
       this.drawCellsContent();
-      this.boardClicked(ev);
     }
   }
 
@@ -443,7 +546,8 @@ export class BoardCell extends LitElement {
           mousey: ev.clientY - rect.top,
           cellx,
           celly,
-          color: this.cellsBgColor[cellx][celly],
+          bgcolor: this.cellsBgColor[cellx][celly],
+          color: this.cellsTextColor[cellx][celly],
           content: this.cellsContent[cellx][celly],
         },
       };
@@ -463,6 +567,7 @@ export class BoardCell extends LitElement {
       for (let j = 0; j < this.cols; j += 1) {
         if (j === colToClear) {
           this.cellsBgColor[i][j] = null;
+          this.cellsTextColor[i][j] = null;
           this.cellsContent[i][j] = null;
         }
       }
@@ -480,6 +585,7 @@ export class BoardCell extends LitElement {
       for (let j = 0; j < this.cols; j += 1) {
         if (i === rowToClear) {
           this.cellsBgColor[i][j] = null;
+          this.cellsTextColor[i][j] = null;
           this.cellsContent[i][j] = null;
         }
       }
@@ -507,9 +613,11 @@ export class BoardCell extends LitElement {
     for (let i = 0; i < this.rows; i += 1) {
       for (let j = 0; j < this.cols; j += 1) {
         this.cellsBgColor[i][j] = null;
+        this.cellsTextColor[i][j] = null;
         this.cellsContent[i][j] = null;
       }
     }
+    this.drawBoard();
   }
 
   _clearAllContentCallback(ev) {
@@ -546,7 +654,7 @@ export class BoardCell extends LitElement {
         class="board"
         role="img"
         aria-label="canvas with board"
-        alt="Mineswipper board with ${this.cols}x${this.rows}"
+        alt="Board with ${this.cols}x${this.rows}"
       ></canvas>
     `;
   }
