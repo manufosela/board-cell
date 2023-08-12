@@ -4,24 +4,39 @@
     <meta charset="utf-8" />
     <style>
       body {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
         background: #fafafa;
+        width:100vw;
       }
       #demo {
         width: 100%;
         height: 100%;
         display: flex;
         flex-direction: column;
+        align-items: start;
+      }
+      aside {
+        display: flex;
+        flex-direction: column;
         align-items: center;
+        justify-content: center;
+        width:30vw;
       }
     </style>
   </head>
   <body>
+    <aside>
+      <label for="content">Contenido: <input type="text" size="3" maxlength="1" aria-label="Contenido" id="content" value="X"></label>
+      <label for="undo">Permitir Deshacer: <input type="checkbox" id="undo"></label>
+    </aside>
     <div id="demo">
       <board-cell
         id="demo-cell"
-        cols="10"
-        rows="10"
-        cell-size="50"
+        cols="5"
+        rows="5"
+        cell-size="100"
         title="Demo board-cell"
         onclick="cellClick"
       >
@@ -31,7 +46,8 @@
     <script type="module" src="../board-cell.js"></script>
     <script>
       const color = Math.floor(Math.random() * 16777215).toString(16);
-      const content = 'X';
+      const color2 = Math.floor(Math.random() * 16777215).toString(16);
+      let content = 'X';
       // eslint-disable-next-line no-unused-vars
       function cellClick(ev) {
         const cellInfo = ev.detail;
@@ -42,6 +58,7 @@
             cellx: cellInfo.cellx,
             celly: cellInfo.celly,
             color: `#${color}`,
+            bgcolor: `#${color2}`,
             content: `${content}`,
           },
         });
@@ -50,14 +67,22 @@
       }
 
       function wcReady(ev) {
-        const { id, wcTag } = ev.detail;
-        if (wcTag === 'board-cell' && id === 'demo-cell') {
+        const { id, componentName } = ev.detail;
+        if (componentName === 'BOARD-CELL' && id === 'demo-cell') {
           const board = document.getElementById(id);
           board.clearEventCell(1, 1);
         }
       }
 
-      document.addEventListener('wc-Ready', wcReady);
+      document.addEventListener('wc-ready', wcReady);
+      document.getElementById('undo').addEventListener('change', (ev) => {
+        const board = document.getElementById('demo-cell');
+        board.undo = ev.target.checked;
+      });
+      document.getElementById('content').addEventListener('change', (ev) => {
+        content = ev.target.value;
+      });
+
     </script>
   </body>
 </html>
