@@ -3,6 +3,7 @@ const cellSize = 40; // px
 let boardMe;
 let boardEnemy;
 let modalOverlay;
+const imagePath = 'imagenes/';
 
 let statusGame = 'define';
 let shipSelected = null;
@@ -23,16 +24,18 @@ let humanShipInkling = null;
 let boards;
 
 const ships = [
-  ['imagenes/1.png'],
-  ['imagenes/2_0.png', 'imagenes/2_1.png'],
-  ['imagenes/3_0.png', 'imagenes/3_1.png', 'imagenes/3_2.png'],
+  [`${imagePath}1.png`],
+  [`${imagePath}2_0.png`, `${imagePath}2_1.png`],
+  [`${imagePath}3_0.png`, `${imagePath}3_1.png`, `${imagePath}3_2.png`],
   [
-    'imagenes/4_0.png',
-    'imagenes/4_1.png',
-    'imagenes/4_2.png',
-    'imagenes/4_3.png',
+    `${imagePath}4_0.png`,
+    `${imagePath}4_1.png`,
+    `${imagePath}4_2.png`,
+    `${imagePath}4_3.png`,
   ],
 ];
+const waterImage = `${imagePath}agua.png`;
+const hitImage = `${imagePath}tocado.png`;
 
 function _closeModal() {
   const closeModalBtn = document.querySelector('#closeModalBtn');
@@ -160,7 +163,7 @@ function putMyShipsInRandomPosition() {
   shipsBoardMe.forEach((row, y) => {
     row.forEach((cell, x) => {
       if (cell !== null) {
-        changeCellContent('boardMe', x, y, `imagenes/${cell}.png`);
+        changeCellContent('boardMe', x, y, `${imagePath}${cell}.png`);
         shipsInPosition += 1;
       }
     });
@@ -180,8 +183,8 @@ function showGameRules() {
           <li>You can place them manually or randomly by clicking the <strong>"Random position"</strong> button</li>
           <li>Once you've placed your ships, click the <strong>"Start game"</strong> button</li>
           <li>On the right board (Enemy ships), click on a cell to shoot</li>
-          <li>If you hit a cell with an enemy ship, a hit ship image will be displayed (<img src="images/hit.png" width="20">)</li>
-          <li>If you miss a cell with no enemy ship, a water image will be displayed (<img src="images/water.png" width="20">)</li>
+          <li>If you hit a cell with an enemy ship, a hit ship image will be displayed (<img src="${hitImage}" width="20">)</li>
+          <li>If you miss a cell with no enemy ship, a water image will be displayed (<img src="${waterImage}" width="20">)</li>
           <li>If you hit, you continue to have your turn to shoot</li>
           <li>If you miss, the turn passes to the enemy</li>
           <li>The enemy, if they hit, continues to have their turn to shoot</li>
@@ -200,8 +203,8 @@ function showGameRules() {
           <li>Puedes colocarlos de manera manual o aleatoriamente pulsando el botón <strong>"Random position"</strong></li>
           <li>Cuando hayas colocado tus barcos pulsa el botón <strong>"Start game"</strong></li>
           <li>En el tablero de la derecha (Enemy ships) pulsa sobre una casilla para disparar</li>
-          <li>Si aciertas en una casilla donde hay un barco enemigo, se mostrará una imagen de barco tocado (<img src="imagenes/tocado.png" width="20">)</li>
-          <li>Si no aciertas en una casilla donde no hay un barco enemigo, se mostrará una imagen de agua (<img src="imagenes/agua.png" width="20">)</li>
+          <li>Si aciertas en una casilla donde hay un barco enemigo, se mostrará una imagen de barco tocado (<img src="${hitImage}" width="20">)</li>
+          <li>Si no aciertas en una casilla donde no hay un barco enemigo, se mostrará una imagen de agua (<img src="${waterImage}" width="20">)</li>
           <li>Si aciertas, sigues teniendo turno para disparar</li>
           <li>Si fallas, el turno pasa al enemigo</li>
           <li>El enemigo, si acierta, sigue teniendo turno para disparar</li>
@@ -220,9 +223,11 @@ function clearships() {
   shipsBoardMe = getArrayCells(boardSize, boardSize, null);
   shipsInPosition = 0;
   document.getElementById('shipsImages').classList.remove('invisible');
-  document
-    .querySelectorAll('.ships LI IMG.selected')
-    .classList.remove('selected');
+  if (document.querySelector('.ships LI IMG.selected')) {
+    document
+      .querySelector('.ships LI IMG.selected')
+      .classList.remove('selected');
+  }
 }
 
 function startGame() {
@@ -239,10 +244,12 @@ function startGame() {
 
 function selectShip(ev) {
   shipSelected = ev.target;
-  const shipNow = document.querySelector('.ships LI IMG.selected');
-  shipSelected.classList.toggle('selected');
-  if (shipNow) {
-    shipNow.classList.toggle('selected');
+  if (shipSelected.tagName === 'IMG') {
+    const shipNow = document.querySelector('.ships LI IMG.selected');
+    shipSelected.classList.toggle('selected');
+    if (shipNow) {
+      shipNow.classList.toggle('selected');
+    }
   }
 }
 
@@ -271,15 +278,17 @@ function cellClickMe(ev) {
     if (shipSelected) {
       // ad to board-cell the ship selected
       const shipToDraw = ships[shipSelected.dataset.ship];
-      shipToDraw.forEach(ship => {
-        const cellx = ev.detail.cellx + shipToDraw.indexOf(ship);
-        changeCellContent('boardMe', cellx, ev.detail.celly, ship);
-        shipsBoardMe[ev.detail.celly][cellx] =
-          parseInt(shipSelected.dataset.ship, 10) + 1;
-      });
-      shipSelected.classList.toggle('selected');
-      shipSelected.remove();
-      shipsInPosition += 1;
+      if (shipToDraw) {
+        shipToDraw.forEach(ship => {
+          const cellx = ev.detail.cellx + shipToDraw.indexOf(ship);
+          changeCellContent('boardMe', cellx, ev.detail.celly, ship);
+          shipsBoardMe[ev.detail.celly][cellx] =
+            parseInt(shipSelected.dataset.ship, 10) + 1;
+        });
+        shipSelected.classList.toggle('selected');
+        shipSelected.remove();
+        shipsInPosition += 1;
+      }
     }
   }
 }
@@ -326,7 +335,7 @@ async function playBot() {
     // comprueba si en la posicion clicada hay un barco enemigo
     if (shipsBoardMe[celly][cellx] !== null) {
       botShots[cellx][celly] = 'tocado';
-      changeCellContent('boardMe', cellx, celly, 'imagenes/tocado.png');
+      changeCellContent('boardMe', cellx, celly, hitImage);
       if (humanShipInkling === null && lastShootTocado === null) {
         humanShipInkling = cellx;
       }
@@ -335,7 +344,7 @@ async function playBot() {
       setTimeout(playBot, 1000);
     } else {
       botShots[cellx][celly] = 'agua';
-      changeCellContent('boardMe', cellx, celly, 'imagenes/agua.png');
+      changeCellContent('boardMe', cellx, celly, waterImage);
       if (humanShipInkling !== null && lastShootTocado !== null) {
         console.log(humanShipInkling, cellx, lastShootTocado.cellx);
         nextShootDir = -nextShootDir;
@@ -365,7 +374,7 @@ async function cellClickEnemy(ev) {
         'boardEnemy',
         ev.detail.cellx,
         ev.detail.celly,
-        'imagenes/tocado.png'
+        hitImage
       );
       shipsEnemyTouched += 1;
       if (shipsEnemyTouched === 20) {
@@ -376,7 +385,7 @@ async function cellClickEnemy(ev) {
         'boardEnemy',
         ev.detail.cellx,
         ev.detail.celly,
-        'imagenes/agua.png'
+        waterImage
       );
       await new Promise(resolve => setTimeout(resolve, 1000));
       nextTurn();
