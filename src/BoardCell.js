@@ -55,11 +55,16 @@ export class BoardCell extends LitElement {
        */
       title: { type: String },
       /**
-       * Allow undo cell content with second click
+       * Allow undo cell content with second click in the same cell with content
        * @property
        * @type { Boolean }
        */
       undo: { type: Boolean },
+      /**
+       * Restore content value used when undo is true
+       * @property
+       * @type { String }
+       */
       restoreContent: { type: String },
       /**
        * Redraw cells when click in a cell
@@ -112,6 +117,11 @@ export class BoardCell extends LitElement {
 
   constructor() {
     super();
+    this._initializeVariables();
+    this._bindMethods();
+  }
+
+  _initializeVariables() {
     this.cols = 5;
     this.rows = 5;
     this.cellSize = 50;
@@ -133,7 +143,9 @@ export class BoardCell extends LitElement {
     this.gridColor = '#CCCCCC';
     this.backgroundColor = '#FFFFFF';
     this.restoreContent = '';
+  }
 
+  _bindMethods() {
     this.boardClicked = this.boardClicked.bind(this);
     this.setCellData = this.setCellData.bind(this);
     this.setCellsData = this.setCellsData.bind(this);
@@ -172,18 +184,18 @@ export class BoardCell extends LitElement {
   }
 
   _initializeCells() {
-    for (let i = 0; i < this.rows; i += 1) {
-      this.cellsBgColor.push([]);
-      this.cellsTextColor.push([]);
-      this.cellsContent.push([]);
-      this.cellsWithoutEvent.push([]);
-      for (let j = 0; j < this.cols; j += 1) {
-        this.cellsBgColor[i].push(null);
-        this.cellsTextColor[i].push(null);
-        this.cellsContent[i].push(null);
-        this.cellsWithoutEvent[i].push(false);
-      }
-    }
+    this.cellsBgColor = Array.from({ length: this.rows }, () =>
+      Array(this.cols).fill(null)
+    );
+    this.cellsTextColor = Array.from({ length: this.rows }, () =>
+      Array(this.cols).fill(null)
+    );
+    this.cellsContent = Array.from({ length: this.rows }, () =>
+      Array(this.cols).fill(null)
+    );
+    this.cellsWithoutEvent = Array.from({ length: this.rows }, () =>
+      Array(this.cols).fill(false)
+    );
   }
 
   _enableBoardEvents() {
