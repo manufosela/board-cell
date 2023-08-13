@@ -8,13 +8,14 @@ const cellSize = 150;
 const fontSize = 12;
 const idGame = '3en3enraya';
 const titleGame = '3 en 3 en raya';
+const imagePath = 'imagenes/';
 
 let highlights = [];
 let concentricos = false;
 let fichasTotal = 0;
 let turno = 0;
 let size = 0;
-let content = `imagenes/${fichas[turno]}${sizes[size]}.png`;
+let content = `${imagePath}${fichas[turno]}${sizes[size]}.png`;
 let ganador = false;
 const numFichasByTablero = [0, 0, 0];
 const tableros = [
@@ -63,9 +64,9 @@ function drawTurnCircles() {
   const ficha = fichas[turno];
   const fichasLayer = document.getElementById('fichas');
   fichasLayer.innerHTML = /* html */ `
-    <img src="imagenes/${ficha}${sizes[0]}.png" alt="" data-size="0" class="selected">
-    <img src="imagenes/${ficha}${sizes[1]}.png" alt="" data-size="1">
-    <img src="imagenes/${ficha}${sizes[2]}.png" alt="" data-size="2">`;
+    <img src="${imagePath}${ficha}${sizes[0]}.png" alt="" data-size="0" class="selected">
+    <img src="${imagePath}${ficha}${sizes[1]}.png" alt="" data-size="1">
+    <img src="${imagePath}${ficha}${sizes[2]}.png" alt="" data-size="2">`;
 }
 
 function ganadorConcentricos(cellInfo) {
@@ -204,7 +205,7 @@ function changeCellContent(cellInfo, _content, _color) {
 }
 
 function putFichaIntoCell(cellInfo) {
-  content = `imagenes/${fichas[turno]}${sizes[size]}.png`;
+  content = `${imagePath}${fichas[turno]}${sizes[size]}.png`;
   changeCellContent(cellInfo, content, '#FFFFFF');
 }
 
@@ -222,7 +223,7 @@ function putFicha(ev) {
     content = ficha.src;
     size = parseInt(ficha.dataset.size, 10);
   }
-  console.log(turno, size);
+  // console.log(turno, size);
 }
 
 function winerActions(cellInfo) {
@@ -238,7 +239,7 @@ function winerActions(cellInfo) {
 function checkMovement(cellInfo) {
   if (numFichasByTablero[size] >= 4 || fichasTotal > 4) {
     ganador = comprobarGanador(size, cellInfo);
-    console.log(ganador);
+    // console.log(ganador);
     if (ganador === 0 || ganador === 1) {
       document.getElementById(
         'ganador'
