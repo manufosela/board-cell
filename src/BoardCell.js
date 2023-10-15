@@ -394,12 +394,7 @@ export class BoardCell extends LitElement {
 
   fillBgColor(cellx, celly, bgColor) {
     this.ctx.fillStyle = bgColor;
-    this.ctx.fillRect(
-      cellx * this.cellSize,
-      celly * this.cellSize,
-      this.cellSize,
-      this.cellSize
-    );
+    this.ctx.fillRect(cellx, celly, this.cellSize, this.cellSize);
   }
 
   drawBorder(cellx, celly, color, borderWith = 1) {
@@ -411,6 +406,19 @@ export class BoardCell extends LitElement {
       this.cellSize,
       this.cellSize
     );
+  }
+
+  drawBorderLine(start, end, color, borderWith = 1) {
+    const startX = start[0];
+    const startY = start[1];
+    const endX = end[0];
+    const endY = end[1];
+    this.ctx.beginPath();
+    this.ctx.moveTo(startX * this.cellSize, startY * this.cellSize);
+    this.ctx.lineTo(endX * this.cellSize, endY * this.cellSize);
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = borderWith;
+    this.ctx.stroke();
   }
 
   _drawCellContent(
@@ -425,6 +433,7 @@ export class BoardCell extends LitElement {
       this.redrawCells ||
       !this.cellsContent[cellx / this.cellSize][celly / this.cellSize]
     ) {
+      this.ctx.clearRect(cellx, celly, this.cellSize, this.cellSize);
       this.fillBgColor(cellx, celly, bgColor);
     }
 
